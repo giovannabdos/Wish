@@ -1,7 +1,7 @@
 import React, {useState, useEffect} from 'react';
 import {StyleSheet, View, Text, TouchableOpacity} from 'react-native';
 
-export default function Button({text, type}) {
+export default function Button({text, type, onPress}) {
   const [backgroundColor, setBackgroundColor] = useState('#193E5B');
   const [color, setColor] = useState('#ffffff');
   const [borderColor, setBorderColor] = useState('#193E5B');
@@ -20,7 +20,9 @@ export default function Button({text, type}) {
   return (
     <View style={[styles.container, {backgroundColor, borderColor}]}>
       <TouchableOpacity>
-        <Text style={[styles.text, {color}]}>{text}</Text>
+        <Text style={[styles.text, {color}]} onPress={onPress}>
+          {text}
+        </Text>
       </TouchableOpacity>
     </View>
   );

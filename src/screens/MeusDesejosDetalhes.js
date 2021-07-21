@@ -1,13 +1,12 @@
 import React from 'react';
-import {StyleSheet, View, Text} from 'react-native';
+import {StyleSheet, Image, View, Text} from 'react-native';
+import Desires from '../components/Desires';
 import Container from '../components/Container';
 
-export default function OutrosDesejos() {
+export default function MeusDesejosDetalhes({route}) {
   return (
     <Container style={styles.container}>
-      <Text style={{fontSize: 50, fontFamily: 'Montserrat'}}>
-        Outros Desejos
-      </Text>
+      <Desires full item={route.params.item} />
     </Container>
   );
 }
