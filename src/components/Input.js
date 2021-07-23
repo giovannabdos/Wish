@@ -3,7 +3,7 @@ import {StyleSheet, TextInput, View, Text} from 'react-native';
 import {clockRunning} from 'react-native-reanimated';
 import Blusa from '../assets/images/Blusa.png';
 
-export default function Input({label, secureTextEntry, type}) {
+export default function Input({label, secureTextEntry, type, ...props}) {
   const [color, setColor] = useState('#000000');
   const [borderColor, setBorderColor] = useState('#979191');
 
@@ -19,6 +19,7 @@ export default function Input({label, secureTextEntry, type}) {
       <TextInput
         style={[styles.input, {borderColor, color}]}
         secureTextEntry={secureTextEntry}
+        {...props}
       />
     </View>
   );
@@ -38,5 +39,6 @@ const styles = StyleSheet.create({
     marginBottom: 3,
     marginRight: 19,
     fontFamily: 'Montserrat',
+    textAlignVertical: 'top',
   },
 });

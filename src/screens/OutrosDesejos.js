@@ -5,9 +5,7 @@ import Container from '../components/Container';
 export default function OutrosDesejos() {
   return (
     <Container style={styles.container}>
-      <Text style={{fontSize: 50, fontFamily: 'Montserrat'}}>
-        Outros Desejos
-      </Text>
+      <Text style={{fontSize: 50, fontFamily: 'Montserrat'}}></Text>
     </Container>
   );
 }

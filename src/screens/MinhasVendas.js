@@ -4,11 +4,7 @@ import Input from '../components/Input';
 import Container from '../components/Container';
 
 export default function MinhasVendas() {
-  return (
-    <Container>
-      <Input type="primary" label={'Desejo'} />
-    </Container>
-  );
+  return <Container></Container>;
 }
 
 const styles = StyleSheet.create({});

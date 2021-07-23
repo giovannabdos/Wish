@@ -1,7 +1,8 @@
 import React, {useState} from 'react';
 import {StyleSheet, FlatList, TouchableOpacity} from 'react-native';
-import Desires from '../components/Desires';
+import Desire from '../components/Desire';
 import Container from '../components/Container';
+import Select from '../components/Select';
 
 export default function MeusDesejos({navigation}) {
   const [desires, setDesires] = useState([
@@ -16,7 +17,7 @@ export default function MeusDesejos({navigation}) {
       store: {
         name: 'Loja A',
       },
-      status: 'opened',
+      status: 1,
       original_image:
         'https://rovitex.vteximg.com.br/arquivos/ids/313007-1000-1000/Blusao-Masculino-Manga-Longa-Rovitex-Verde.jpg?v=637508258260900000',
       desired_image: null,
@@ -35,7 +36,7 @@ export default function MeusDesejos({navigation}) {
       store: {
         name: 'Loja B',
       },
-      status: 'reserved',
+      status: 2,
       original_image:
         'https://http2.mlstatic.com/D_NQ_NP_974927-MLB44000017603_112020-W.jpg',
       desired_image:
@@ -44,16 +45,77 @@ export default function MeusDesejos({navigation}) {
       delivery_forecast: '23/09/2021 17:45',
       created_at: '15/09/2021 17:00',
     },
+    {
+      id: 3,
+      name: 'Casaco Masculino',
+      customer: {
+        name: 'Cid dos Santos',
+        email: '...',
+        whatsapp: '(21) 99999-9999 ',
+      },
+      store: {
+        name: 'Loja C',
+      },
+      status: 5,
+      original_image:
+        'https://static.netshoes.com.br/produtos/blusa-moletom-algodao-aberto-mooboo-c-bolso-e-capuz/06/38B-0000-006/38B-0000-006_zoom1.jpg?ts=1617839559&',
+      desired_image:
+        'https://static.netshoes.com.br/produtos/moletom-com-ziper-jon-cotre-unissex/10/19H-0026-010/19H-0026-010_zoom1.jpg?ts=1622196629&',
+      complements: 'Tamanho G, Cor cinza',
+      delivery_forecast: '12/10/2021 17:45',
+      created_at: '01/10/2021 13:00',
+    },
+    {
+      id: 4,
+      name: 'Moletom Masculino',
+      customer: {
+        name: 'Cid dos Santos',
+        email: '...',
+        whatsapp: '(21) 99999-9999 ',
+      },
+      store: {
+        name: 'Loja C',
+      },
+      status: 3,
+      original_image:
+        'https://img.ltwebstatic.com/images3_pi/2021/01/05/1609818875fd26798461ba635033de9078f8a0e903_thumbnail_600x.webp',
+      desired_image:
+        'https://img.ltwebstatic.com/images3_pi/2021/01/27/16117165617949efdb6caecde04166dcbb7c136e07_thumbnail_600x.webp',
+      complements: 'Tamanho M, Cor Verde',
+      delivery_forecast: '19/08/2021 15:45',
+      created_at: '05/08/2021 10:00',
+    },
+    {
+      id: 5,
+      name: 'Casaco Masculino',
+      customer: {
+        name: 'Cid dos Santos',
+        email: '...',
+        whatsapp: '(21) 99999-9999 ',
+      },
+      store: {
+        name: 'Loja C',
+      },
+      status: 6,
+      original_image:
+        'https://img.ltwebstatic.com/images3_pi/2021/01/05/160983295658efc31ecdd3c6f518d42c60dcf0f47c_thumbnail_600x.webp',
+      desired_image:
+        'https://img.ltwebstatic.com/images3_pi/2021/01/05/160983295658efc31ecdd3c6f518d42c60dcf0f47c_thumbnail_600x.webp',
+      complements: 'Tamanho G, Cor azul',
+      delivery_forecast: '10/09/2021 17:45',
+      created_at: '25/08/2021 13:00',
+    },
   ]);
 
   return (
     <Container style={styles.container}>
+      <Select />
       <FlatList
         data={desires}
         renderItem={({item}) => (
           <TouchableOpacity
             onPress={() => navigation.navigate('Desejos', {item})}>
-            <Desires item={item} />
+            <Desire item={item} />
           </TouchableOpacity>
         )}
         keyExtractor={item => item.id}

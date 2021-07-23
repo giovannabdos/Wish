@@ -28,7 +28,6 @@ const styles = StyleSheet.create({
     borderStyle: 'dashed',
     borderColor: '#979191',
     marginTop: 20,
-    marginBottom: 50,
   },
   camera: {
     marginTop: 167,

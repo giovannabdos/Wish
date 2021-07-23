@@ -5,6 +5,7 @@ import MeusDesejos from './screens/MeusDesejos';
 import MeusDesejosDetalhes from './screens/MeusDesejosDetalhes';
 import OutrosDesejos from './screens/OutrosDesejos';
 import MinhasVendas from './screens/MinhasVendas';
+import AddDesejo from './screens/AddDesejo';
 import Mais from './screens/Mais';
 import {createMaterialBottomTabNavigator} from '@react-navigation/material-bottom-tabs';
 import {createStackNavigator} from '@react-navigation/stack';
@@ -35,6 +36,18 @@ function MeusDesejosStack() {
         options={{headerLeft: () => null}}
       />
       <Stack.Screen name="Desejos" component={MeusDesejosDetalhes} />
+    </Stack.Navigator>
+  );
+}
+
+function AddDesejoStack() {
+  return (
+    <Stack.Navigator>
+      <Stack.Screen
+        name="Cadastrar Desejo"
+        component={AddDesejo}
+        options={{headerLeft: () => null}}
+      />
     </Stack.Navigator>
   );
 }
@@ -88,6 +101,15 @@ function Tabs() {
         options={{
           tabBarIcon: ({color}) => (
             <FontAwesome name="heart" size={20} color={color} />
+          ),
+        }}
+      />
+      <Tab.Screen
+        name="Cadastrar"
+        component={AddDesejoStack}
+        options={{
+          tabBarIcon: ({color}) => (
+            <FontAwesome name="plus" size={20} color={color} />
           ),
         }}
       />

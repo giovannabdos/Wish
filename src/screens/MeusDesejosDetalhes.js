@@ -1,12 +1,12 @@
 import React from 'react';
 import {StyleSheet, Image, View, Text} from 'react-native';
-import Desires from '../components/Desires';
+import Desire from '../components/Desire';
 import Container from '../components/Container';
 
 export default function MeusDesejosDetalhes({route}) {
   return (
     <Container style={styles.container}>
-      <Desires full item={route.params.item} />
+      <Desire full item={route.params.item} />
     </Container>
   );
 }
