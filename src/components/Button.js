@@ -1,7 +1,13 @@
 import React, {useState, useEffect} from 'react';
-import {StyleSheet, View, Text, TouchableOpacity} from 'react-native';
+import {
+  StyleSheet,
+  ActivityIndicator,
+  Text,
+  View,
+  TouchableOpacity,
+} from 'react-native';
 
-export default function Button({text, type, onPress}) {
+export default function Button({text, type, onPress, loading}) {
   const [backgroundColor, setBackgroundColor] = useState('#193E5B');
   const [color, setColor] = useState('#ffffff');
   const [borderColor, setBorderColor] = useState('#193E5B');
@@ -18,11 +24,15 @@ export default function Button({text, type, onPress}) {
   }, []);
 
   return (
-    <View style={[styles.container, {backgroundColor, borderColor}]}>
-      <TouchableOpacity>
-        <Text style={[styles.text, {color}]} onPress={onPress}>
-          {text}
-        </Text>
+    <View style={{opacity: loading ? 0.5 : 1}}>
+      <TouchableOpacity
+        style={[styles.container, {backgroundColor, borderColor}]}
+        onPress={onPress}>
+        {loading ? (
+          <ActivityIndicator color={color} size={24} />
+        ) : (
+          <Text style={[styles.text, {color}]}>{text}</Text>
+        )}
       </TouchableOpacity>
     </View>
   );

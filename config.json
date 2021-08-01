@@ -1,0 +1,6 @@
+{
+  "prod-host": "",
+  "staging-host": "https://wish-co.herokuapp.com",
+  "test-host": "http://localhost:3000",
+  "environment": "staging"
+}

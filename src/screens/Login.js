@@ -1,26 +1,120 @@
-import React from 'react';
+import React, {useState} from 'react';
+import {connect} from 'react-redux';
 import {StyleSheet, Image, View, Text} from 'react-native';
+import {setUser, setToken} from '../redux/actions';
 import Logo from '../assets/images/Logo.png';
 import Input from '../components/Input';
 import Button from '../components/Button';
+import Local from '../services/Local';
+import api from '../services/api';
+import ErrorMessage from '../components/ErrorMessage';
 
-export default function Login() {
+function Login({setUser, setToken}) {
+  const [login, setLogin] = useState('');
+  const [loginErrorMessage, setLoginErrorMessage] = useState(null);
+  const [password, setPassword] = useState('');
+  const [passwordErrorMessage, setPasswordErrorMessage] = useState(null);
+  const [isLoading, setIsLoading] = useState(false);
+  const [errorMessage, setErrorMessage] = useState(null);
+
+  const validateFields = () => {
+    let validated = true;
+
+    if (login === '') {
+      setLoginErrorMessage('Campo obrigatório');
+      validated = false;
+    }
+
+    if (password === '') {
+      setPasswordErrorMessage('Campo obrigatório');
+      validated = false;
+    }
+
+    return validated;
+  };
+
+  const signIn = async () => {
+    try {
+      setErrorMessage(null);
+
+      if (!validateFields()) {
+        return;
+      }
+
+      setIsLoading(true);
+
+      const response = await api.post('/users/authenticate', {
+        login,
+        password,
+      });
+
+      console.log(response);
+
+      const {user, token} = response.data;
+
+      await Local.setUser(user);
+      await Local.setToken(token);
+      setUser(user);
+      setToken(token);
+    } catch (response) {
+      console.log(response);
+      if (response?.data?.message) {
+        setErrorMessage(response.data.message);
+      }
+      setIsLoading(false);
+    }
+  };
+
   return (
     <View style={styles.container}>
-      <Image source={Logo} style={styles.logo} />
-      <View style={{flexDirection: 'row'}}>
-        <Text style={styles.title}>Faça seu Login e</Text>
-        <Text style={styles.title2}>Boas-Vendas</Text>
+      <View style={styles.logoContainer}>
+        <Image source={Logo} style={styles.logo} />
       </View>
-      <View style={styles.cpf}>
-        <Input type="secondary" label={'CPF ou matrícula'} />
-      </View>
-      <View style={styles.senha}>
-        <Input type="secondary" label={'Senha'} secureTextEntry={true} />
-      </View>
-      <Text style={styles.text}>Esqueceu a Senha?</Text>
-      <View style={styles.button}>
-        <Button type="tertiary" text={'Entrar'} />
+      <View style={styles.contentContainer}>
+        <View style={styles.titleContainer}>
+          <Text style={styles.title}>
+            Faça seu Login e{' '}
+            <Text style={[styles.title, styles.bold]}>Boas-Vendas</Text>
+          </Text>
+        </View>
+
+        <View style={styles.errorContainer}>
+          <ErrorMessage message={errorMessage} />
+        </View>
+
+        <View style={styles.cpf}>
+          <Input
+            type="secondary"
+            label={'CPF ou matrícula'}
+            value={login}
+            onChangeText={text => {
+              setLoginErrorMessage(null);
+              setLogin(text);
+            }}
+            errorMessage={loginErrorMessage}
+          />
+        </View>
+        <View style={styles.senha}>
+          <Input
+            type="secondary"
+            label={'Senha'}
+            secureTextEntry={true}
+            value={password}
+            onChangeText={text => {
+              setPasswordErrorMessage(null);
+              setPassword(text);
+            }}
+            errorMessage={passwordErrorMessage}
+          />
+        </View>
+        <Text style={styles.text}>Esqueceu a Senha?</Text>
+
+        <Button
+          type="tertiary"
+          text={'Entrar'}
+          onPress={() => signIn()}
+          loading={isLoading}
+        />
       </View>
     </View>
   );
@@ -30,47 +124,59 @@ const styles = StyleSheet.create({
   container: {
     backgroundColor: '#193E5B',
     width: '100%',
+    paddingHorizontal: 20,
+    flex: 1,
+  },
+  logoContainer: {
+    flex: 0.4,
+    justifyContent: 'center',
+  },
+  logo: {
+    width: 108,
+    height: 90,
+    alignSelf: 'center',
+  },
+  contentContainer: {
+    flex: 1,
+  },
+  titleContainer: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    justifyContent: 'center',
   },
   title: {
     fontSize: 24,
     color: '#ffffff',
-    marginLeft: 21,
     fontFamily: 'Montserrat',
+    textAlign: 'center',
+    marginBottom: 10,
   },
-  title2: {
-    fontSize: 24,
-    color: '#ffffff',
+  bold: {
     fontFamily: 'Montserrat-Bold',
-    marginLeft: 8,
   },
-  logo: {
-    marginTop: 28,
-    marginLeft: 140,
-    marginBottom: 33,
+  errorContainer: {
+    marginBottom: 10,
   },
   cpf: {
-    marginTop: 29,
-    marginLeft: 21,
     fontFamily: 'Montserrat',
     color: '#FFFFFF',
   },
   senha: {
     marginTop: 24,
     fontFamily: 'Montserrat',
-    marginLeft: 21,
     color: '#FFFFFF',
   },
   text: {
     marginTop: 15,
     color: '#FFFFFF',
     alignSelf: 'flex-end',
-    marginRight: 19,
     marginBottom: 50,
     fontFamily: 'Montserrat',
   },
-  button: {
-    marginLeft: 21,
-    marginRight: 19,
-    marginBottom: 300,
-  },
 });
+
+function mapStateToProps(state) {
+  return {store: state};
+}
+
+export default connect(mapStateToProps, {setUser, setToken})(Login);

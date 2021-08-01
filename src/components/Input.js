@@ -1,9 +1,14 @@
 import React, {useState, useEffect} from 'react';
 import {StyleSheet, TextInput, View, Text} from 'react-native';
-import {clockRunning} from 'react-native-reanimated';
-import Blusa from '../assets/images/Blusa.png';
+import ErrorMessage from './ErrorMessage';
 
-export default function Input({label, secureTextEntry, type, ...props}) {
+export default function Input({
+  label,
+  secureTextEntry,
+  type,
+  errorMessage,
+  ...props
+}) {
   const [color, setColor] = useState('#000000');
   const [borderColor, setBorderColor] = useState('#979191');
 
@@ -13,14 +18,25 @@ export default function Input({label, secureTextEntry, type, ...props}) {
       setBorderColor('#ffffff');
     }
   }, []);
+
   return (
     <View style={styles.container}>
-      <Text style={[styles.label, {color}]}>{label}</Text>
+      <Text style={[styles.label, {color: !!errorMessage ? '#FF80AB' : color}]}>
+        {label}
+      </Text>
       <TextInput
-        style={[styles.input, {borderColor, color}]}
+        style={[
+          styles.input,
+          {borderColor: !!errorMessage ? '#FF80AB' : borderColor, color},
+        ]}
         secureTextEntry={secureTextEntry}
         {...props}
       />
+      {!!errorMessage && (
+        <View style={styles.errorMessageContainer}>
+          <ErrorMessage message={errorMessage} />
+        </View>
+      )}
     </View>
   );
 }
@@ -37,8 +53,10 @@ const styles = StyleSheet.create({
     paddingVertical: 3,
     paddingHorizontal: 5,
     marginBottom: 3,
-    marginRight: 19,
     fontFamily: 'Montserrat',
     textAlignVertical: 'top',
+  },
+  errorMessageContainer: {
+    marginTop: 3,
   },
 });
