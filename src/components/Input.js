@@ -11,30 +11,33 @@ export default function Input({
 }) {
   const [color, setColor] = useState('#000000');
   const [borderColor, setBorderColor] = useState('#979191');
+  const [errorColor, setErrorColor] = useState('#dd2c00');
 
   useEffect(() => {
     if (type === 'secondary') {
       setColor('#FFFFFF');
       setBorderColor('#ffffff');
+      setErrorColor('#FF80AB');
     }
   }, []);
 
   return (
     <View style={styles.container}>
-      <Text style={[styles.label, {color: !!errorMessage ? '#FF80AB' : color}]}>
+      <Text
+        style={[styles.label, {color: !!errorMessage ? errorColor : color}]}>
         {label}
       </Text>
       <TextInput
         style={[
           styles.input,
-          {borderColor: !!errorMessage ? '#FF80AB' : borderColor, color},
+          {borderColor: !!errorMessage ? errorColor : borderColor, color},
         ]}
         secureTextEntry={secureTextEntry}
         {...props}
       />
       {!!errorMessage && (
         <View style={styles.errorMessageContainer}>
-          <ErrorMessage message={errorMessage} />
+          <ErrorMessage type={type} message={errorMessage} />
         </View>
       )}
     </View>
@@ -43,7 +46,7 @@ export default function Input({
 
 const styles = StyleSheet.create({
   label: {
-    fontSize: 19,
+    fontSize: 15,
     fontFamily: 'Montserrat',
   },
   input: {

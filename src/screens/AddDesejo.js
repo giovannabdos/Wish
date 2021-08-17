@@ -1,16 +1,101 @@
 import React, {useState} from 'react';
-import {StyleSheet, Text, View, Image} from 'react-native';
+import {StyleSheet, Text, View} from 'react-native';
+import {connect} from 'react-redux';
+import {setMyDesires} from '../redux/actions';
+import * as Yup from 'yup';
+import {Formik} from 'formik';
 import Container from '../components/Container';
 import Button from '../components/Button';
 import Input from '../components/Input';
 import ProductPicker from '../components/ProductPicker';
+import ErrorMessage from '../components/ErrorMessage';
+import api from '../services/api';
 
-export default function AddDesejo() {
-  const [step, setStep] = useState('Cliente');
+const customerFormSchema = Yup.object().shape({
+  whatsapp: Yup.string().required('Campo obrigatório'),
+  name: Yup.string().required('Campo obrigatório'),
+  email: Yup.string().email('Email inválido').nullable().notRequired(),
+});
+
+const desireFormSchema = Yup.object().shape({
+  desire: Yup.string().required('Campo obrigatório'),
+  complements: Yup.string().required('Campo obrigatório'),
+  original_image: Yup.object().shape({
+    uri: Yup.string().required('Imagem obrigatória'),
+  }),
+});
+
+function AddDesejo({store, navigation, setMyDesires}) {
+  const [step, setStep] = useState(1);
+  const [customer, setCustomer] = useState(null);
+  const [errorMessage, setErrorMessage] = useState(null);
+
+  const onSubmitCustomer = async (values, {setSubmitting}) => {
+    try {
+      setErrorMessage(null);
+      setSubmitting(true);
+
+      if (store.user?.store?.brand?.id) {
+        values = {...values, brand_id: store.user?.store?.brand?.id};
+      } else {
+        throw Error();
+      }
+
+      const response = await api.post('/customers', values);
+
+      const {customer_id} = response.data;
+
+      setCustomer({
+        id: customer_id,
+        ...values,
+      });
+      setSubmitting(false);
+      setStep(2);
+    } catch (response) {
+      if (response?.data?.message) {
+        setErrorMessage(response.data.message);
+      } else {
+        setErrorMessage('Houve um erro inesperado, tente novamente');
+      }
+      setSubmitting(false);
+    }
+  };
+
+  const onSubmitDesire = async (values, {setSubmitting, resetForm}) => {
+    try {
+      setErrorMessage(null);
+      setSubmitting(true);
+
+      let formData = new FormData();
+      formData.append('name', values.desire);
+      formData.append('complements', values.complements);
+      formData.append('user_origin_id', store.user?.id);
+      formData.append('customer_id', customer.id);
+      formData.append('original_image', values.original_image);
+
+      const response = await api.post('/desires', formData);
+
+      const {desire} = response.data;
+
+      setSubmitting(false);
+      setMyDesires([desire, ...store.myDesires]);
+      resetForm({});
+      setCustomer(null);
+      setStep(1);
+      navigation.navigate('Meus Desejos');
+    } catch (response) {
+      if (response?.data?.message) {
+        setErrorMessage(response.data.message);
+      } else {
+        setErrorMessage('Houve um erro inesperado, tente novamente');
+      }
+      setSubmitting(false);
+    }
+  };
 
   return (
     <Container>
-      {step === 'Cliente' && (
+      {step === 1 && (
         <>
           <View
             style={{
@@ -29,22 +114,69 @@ export default function AddDesejo() {
               flex: 1,
               justifyContent: 'center',
             }}>
-            <Text style={styles.cliente}>Cliente</Text>
+            <Text style={styles.customer}>Cliente</Text>
             <Text style={styles.desejo}>Desejo</Text>
           </View>
-          <View style={{marginBottom: 14}}>
-            <Input type="primary" label={'Watsapp'} />
-          </View>
-          <View style={{marginBottom: 14}}>
-            <Input type="primary" label={'Nome completo'} />
-          </View>
-          <View style={{marginBottom: 14}}>
-            <Input type="primary" label={'E-mail (opcional)'} />
-          </View>
-          <Button text={'Continuar'} onPress={() => setStep('Desejo')} />
+          <Formik
+            initialValues={customer || {whatsapp: '', name: '', email: null}}
+            onSubmit={onSubmitCustomer}
+            validationSchema={customerFormSchema}>
+            {({
+              values,
+              errors,
+              isSubmitting,
+              touched,
+              handleChange,
+              handleSubmit,
+            }) => (
+              <>
+                <View style={{marginBottom: 14}}>
+                  <Input
+                    type="primary"
+                    label={'Whatsapp'}
+                    value={values.whatsapp}
+                    onChangeText={handleChange('whatsapp')}
+                    errorMessage={
+                      touched?.whatsapp && errors?.whatsapp && errors.whatsapp
+                    }
+                  />
+                </View>
+                <View style={{marginBottom: 14}}>
+                  <Input
+                    type="primary"
+                    label={'Nome completo'}
+                    value={values.name}
+                    onChangeText={handleChange('name')}
+                    errorMessage={touched?.name && errors?.name && errors.name}
+                  />
+                </View>
+                <View style={{marginBottom: 14}}>
+                  <Input
+                    type="primary"
+                    label={'E-mail (opcional)'}
+                    value={values.email}
+                    onChangeText={handleChange('email')}
+                    errorMessage={
+                      touched?.email && errors?.email && errors.email
+                    }
+                  />
+                </View>
+
+                <View style={styles.errorContainer}>
+                  <ErrorMessage message={errorMessage} />
+                </View>
+
+                <Button
+                  text={'Continuar'}
+                  onPress={handleSubmit}
+                  loading={isSubmitting}
+                />
+              </>
+            )}
+          </Formik>
         </>
       )}
-      {step === 'Desejo' && (
+      {step === 2 && (
         <>
           <View
             style={{
@@ -62,30 +194,83 @@ export default function AddDesejo() {
             <Text style={styles.cliente2}>Cliente</Text>
             <Text style={styles.desejo2}>Desejo</Text>
           </View>
-          <View style={{marginBottom: 14}}>
-            <Input type="primary" label={'Desejo'} />
-          </View>
-          <View style={{marginBottom: 14}}>
-            <Input
-              type="primary"
-              label={'Complemento'}
-              multiline
-              numberOfLines={5}
-            />
-          </View>
-          <View style={{marginBottom: 10}}>
-            <ProductPicker />
-          </View>
-          <View style={{marginBottom: 10}}>
-            <Button type="primary" text={'cadastrar'} />
-          </View>
-          <View style={{marginBottom: 53}}>
-            <Button
-              type="secondary"
-              text={'Voltar'}
-              onPress={() => setStep('Cliente')}
-            />
-          </View>
+          <Formik
+            initialValues={{
+              desire: '',
+              complements: '',
+              original_image: null,
+            }}
+            onSubmit={onSubmitDesire}
+            validationSchema={desireFormSchema}>
+            {({
+              values,
+              errors,
+              isSubmitting,
+              touched,
+              setFieldValue,
+              setFieldTouched,
+              handleChange,
+              handleSubmit,
+            }) => (
+              <>
+                <View style={{marginBottom: 14}}>
+                  <Input
+                    type="primary"
+                    label={'Desejo'}
+                    value={values.desire}
+                    onChangeText={handleChange('desire')}
+                    errorMessage={
+                      touched?.desire && errors?.desire && errors.desire
+                    }
+                  />
+                </View>
+                <View style={{marginBottom: 7}}>
+                  <Input
+                    type="primary"
+                    label={'Complementos'}
+                    multiline
+                    numberOfLines={5}
+                    value={values.complements}
+                    onChangeText={handleChange('complements')}
+                    errorMessage={
+                      touched?.complements &&
+                      errors?.complements &&
+                      errors.complements
+                    }
+                  />
+                </View>
+                <View style={{marginBottom: 17}}>
+                  <ProductPicker
+                    value={values.original_image}
+                    onChange={value => {
+                      setFieldValue('original_image', value);
+                      setFieldTouched('original_image', true);
+                    }}
+                    errorMessage={
+                      touched?.original_image &&
+                      errors?.original_image &&
+                      errors.original_image
+                    }
+                  />
+                </View>
+                <View style={{marginBottom: 10}}>
+                  <Button
+                    type="primary"
+                    text={'Cadastrar'}
+                    onPress={handleSubmit}
+                    loading={isSubmitting}
+                  />
+                </View>
+                <View style={{marginBottom: 20}}>
+                  <Button
+                    type="secondary"
+                    text={'Voltar'}
+                    onPress={() => setStep(1)}
+                  />
+                </View>
+              </>
+            )}
+          </Formik>
         </>
       )}
     </Container>
@@ -93,7 +278,7 @@ export default function AddDesejo() {
 }
 
 const styles = StyleSheet.create({
-  cliente: {
+  customer: {
     marginBottom: 10,
     marginRight: 10,
     marginTop: 3,
@@ -129,16 +314,15 @@ const styles = StyleSheet.create({
     backgroundColor: '#193E5B',
     borderWidth: 2,
     borderColor: '#193E5B',
-    width: 30,
-    height: 30,
+    width: 22,
+    height: 22,
   },
   elipseVazia: {
     borderRadius: 20,
-    backgroundColor: '#193E5B',
     borderWidth: 2,
     borderColor: '#193E5B',
-    width: 30,
-    height: 30,
+    width: 22,
+    height: 22,
   },
   line: {
     backgroundColor: '#193E5B',
@@ -148,4 +332,13 @@ const styles = StyleSheet.create({
     height: 0,
     alignSelf: 'center',
   },
+  errorContainer: {
+    marginBottom: 14,
+  },
 });
+
+function mapStateToProps(state) {
+  return {store: state};
+}
+
+export default connect(mapStateToProps, {setMyDesires})(AddDesejo);

@@ -1,13 +1,11 @@
 import React from 'react';
 import {StyleSheet, Image, View, Text} from 'react-native';
-import Blusa from '../assets/images/Blusa.png';
 
 export default function Product({text, image}) {
-  console.log(image);
   return (
     <>
       <View style={styles.container}>
-        <Text style={styles.title1}>{text}</Text>
+        <Text style={styles.title}>{text}</Text>
         <Image source={{uri: image}} style={styles.image} />
       </View>
     </>
@@ -20,17 +18,18 @@ const styles = StyleSheet.create({
     borderRadius: 10,
     marginTop: 10,
   },
-
-  title1: {
+  title: {
     color: '#000',
-    fontSize: 16,
+    fontSize: 14,
     fontFamily: 'Montserrat-Bold',
     marginLeft: 14,
-    marginTop: 10,
-    marginBottom: 6,
+    marginVertical: 5,
+    alignSelf: 'center',
   },
   image: {
     width: '100%',
     height: 300,
+    borderBottomLeftRadius: 10,
+    borderBottomRightRadius: 10,
   },
 });

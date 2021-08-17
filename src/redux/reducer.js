@@ -1,3 +1,5 @@
+import initialState from './initialState';
+
 export default (currentState, action) => {
   switch (action.type) {
     case 'setUser':
@@ -9,6 +11,20 @@ export default (currentState, action) => {
       return {
         ...currentState,
         token: action.token,
+      };
+    case 'setMyDesires':
+      return {
+        ...currentState,
+        myDesires: action.myDesires,
+      };
+    case 'setOtherDesires':
+      return {
+        ...currentState,
+        otherDesires: action.otherDesires,
+      };
+    case 'clearAll':
+      return {
+        ...initialState,
       };
     default:
       return currentState;

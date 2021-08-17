@@ -46,8 +46,7 @@ const styles = StyleSheet.create({
     borderWidth: 2,
   },
   text: {
-    fontFamily: 'Montserrat',
-    fontWeight: 'bold',
-    fontSize: 18,
+    fontFamily: 'Montserrat-Bold',
+    fontSize: 16,
   },
 });

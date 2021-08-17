@@ -13,7 +13,7 @@ export default function App() {
   return (
     <Provider store={store}>
       <NavigationContainer>
-        <StatusBar />
+        <StatusBar backgroundColor={'#193E5B'} />
         <Routes />
       </NavigationContainer>
     </Provider>

@@ -48,8 +48,6 @@ function Login({setUser, setToken}) {
         password,
       });
 
-      console.log(response);
-
       const {user, token} = response.data;
 
       await Local.setUser(user);
@@ -57,7 +55,6 @@ function Login({setUser, setToken}) {
       setUser(user);
       setToken(token);
     } catch (response) {
-      console.log(response);
       if (response?.data?.message) {
         setErrorMessage(response.data.message);
       }

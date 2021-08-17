@@ -22,9 +22,7 @@ export default function Mais() {
   return (
     <Container style={styles.container}>
       <View style={styles.row}>
-        <TouchableOpacity
-          style={styles.button}
-          onPress={() => navigation.navigate('Publications')}>
+        <TouchableOpacity style={styles.button}>
           <MaterialCommunityIcons name="chart-line" size={35} color="#4D4D4D" />
           <Text style={styles.text}>Relatórios</Text>
         </TouchableOpacity>
@@ -32,7 +30,9 @@ export default function Mais() {
           <FontAwesome name="user" size={35} color="#4D4D4D" />
           <Text style={styles.text}>Meu Perfil</Text>
         </TouchableOpacity>
-        <TouchableOpacity style={styles.button}>
+        <TouchableOpacity
+          style={styles.button}
+          onPress={() => navigation.navigate('Settings')}>
           <Ionicons name="settings-sharp" size={35} color="#4D4D4D" />
           <Text style={styles.text}>Configurações</Text>
         </TouchableOpacity>
