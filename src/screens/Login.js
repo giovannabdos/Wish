@@ -8,6 +8,7 @@ import Button from '../components/Button';
 import Local from '../services/Local';
 import api from '../services/api';
 import ErrorMessage from '../components/ErrorMessage';
+import {maskCPF} from '../utils/masks';
 
 function Login({setUser, setToken}) {
   const [login, setLogin] = useState('');
@@ -86,7 +87,7 @@ function Login({setUser, setToken}) {
             value={login}
             onChangeText={text => {
               setLoginErrorMessage(null);
-              setLogin(text);
+              setLogin(maskCPF(text));
             }}
             errorMessage={loginErrorMessage}
           />

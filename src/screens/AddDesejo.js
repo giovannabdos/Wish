@@ -10,9 +10,13 @@ import Input from '../components/Input';
 import ProductPicker from '../components/ProductPicker';
 import ErrorMessage from '../components/ErrorMessage';
 import api from '../services/api';
+import {maskWhatsapp} from '../utils/masks';
 
 const customerFormSchema = Yup.object().shape({
-  whatsapp: Yup.string().required('Campo obrigatório'),
+  whatsapp: Yup.string()
+    .min(14, 'Número iválido')
+    .max(15, 'Número inválido')
+    .required('Campo obrigatório'),
   name: Yup.string().required('Campo obrigatório'),
   email: Yup.string().email('Email inválido').nullable().notRequired(),
 });
@@ -128,6 +132,7 @@ function AddDesejo({store, navigation, setMyDesires}) {
               touched,
               handleChange,
               handleSubmit,
+              setFieldValue,
             }) => (
               <>
                 <View style={{marginBottom: 14}}>
@@ -135,7 +140,10 @@ function AddDesejo({store, navigation, setMyDesires}) {
                     type="primary"
                     label={'Whatsapp'}
                     value={values.whatsapp}
-                    onChangeText={handleChange('whatsapp')}
+                    onChangeText={text => {
+                      const formatedText = maskWhatsapp(text);
+                      setFieldValue('whatsapp', formatedText);
+                    }}
                     errorMessage={
                       touched?.whatsapp && errors?.whatsapp && errors.whatsapp
                     }
