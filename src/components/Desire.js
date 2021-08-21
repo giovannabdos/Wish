@@ -1,24 +1,80 @@
 import React, {useState} from 'react';
-import {StyleSheet, View, Text} from 'react-native';
+import {StyleSheet, View, Text, Modal} from 'react-native';
 import {connect} from 'react-redux';
 import FontAwesome from 'react-native-vector-icons/FontAwesome';
 import FontAwesome5 from 'react-native-vector-icons/FontAwesome5';
 import Fontisto from 'react-native-vector-icons/Fontisto';
+import {setMyDesires} from '../redux/actions';
+import api from '../services/api';
 import Product from './Product';
 import ProductPicker from './ProductPicker';
 import Button from './Button';
 import Input from './Input';
+import ModalChildren from './ModalChildren';
 import status from '../utils/desireStatus';
 import {formatDate, formatCurrency} from '../utils/format';
+import {maskWhatsapp} from '../utils/masks';
+import uuid from 'react-native-uuid';
 
-function Desire({store, item, full}) {
+function Desire({store, item, full, setMyDesires}) {
+  const [itemDesire, setItemDesire] = useState(item);
   const [attemptedToReserv, setAttemptedToReserv] = useState(false);
   const [attemptedToFinishSale, setAttemptedToFinishSale] = useState(false);
+  const [toggleCancelDesireModal, setToggleCancelDesireModal] = useState(false);
+  const [toggleCancelReservationModal, setToggleCancelReservationModal] =
+    useState(false);
+  const [isProcessingModal, setIsProcessingModal] = useState(false);
+  const [modalErrorMessage, setModalErrorMessage] = useState(null);
+
+  const onSubmitCancelDesire = async () => {
+    try {
+      setModalErrorMessage(null);
+      setIsProcessingModal(true);
+
+      const response = await api.put(`/desires/${itemDesire.id}/cancel`, {});
+      const {desire} = response.data;
+
+      const newDesires = [...store.myDesires].filter(d => d.id !== desire.id);
+      setMyDesires([{...desire, uuid: uuid.v4()}, ...newDesires]);
+      setItemDesire(desire);
+      setIsProcessingModal(false);
+      setToggleCancelDesireModal(false);
+    } catch (response) {
+      setModalErrorMessage(
+        'Houve um erro ao tentar cancelar, deseja tentar novamente?',
+      );
+      setIsProcessingModal(false);
+    }
+  };
+
+  const onSubmitCancelReservation = async () => {
+    try {
+      setModalErrorMessage(null);
+      setIsProcessingModal(true);
+
+      const response = await api.put(
+        `/desires/${itemDesire.id}/cancel-reservation`,
+        {},
+      );
+      const {desire} = response.data;
+
+      const newDesires = [...store.myDesires].filter(d => d.id !== desire.id);
+      setMyDesires([{...desire, uuid: uuid.v4()}, ...newDesires]);
+      setItemDesire(desire);
+      setIsProcessingModal(false);
+      setToggleCancelReservationModal(false);
+    } catch (response) {
+      setModalErrorMessage(
+        'Houve um erro ao tentar cancelar a reserva, deseja tentar novamente?',
+      );
+      setIsProcessingModal(false);
+    }
+  };
 
   return (
     <>
       <View style={[styles.container, {marginBottom: full ? 0 : 12}]}>
-        <Text style={styles.cardTitle}>{item.customer.name}</Text>
+        <Text style={styles.cardTitle}>{itemDesire.customer.name}</Text>
         <View style={[styles.itemRow, styles.spacingTop]}>
           <FontAwesome name="whatsapp" size={19} color={'#979191'} />
           <View
@@ -28,9 +84,12 @@ function Desire({store, item, full}) {
                 justifyContent: 'space-between',
               },
             ]}>
-            <Text style={styles.text}>{item.customer.whatsapp}</Text>
-            <Text style={[styles.status, {color: status[item.status].color}]}>
-              {status[item.status].name}
+            <Text style={styles.text}>
+              {maskWhatsapp(itemDesire.customer.whatsapp)}
+            </Text>
+            <Text
+              style={[styles.status, {color: status[itemDesire.status].color}]}>
+              {status[itemDesire.status].name}
             </Text>
           </View>
         </View>
@@ -43,11 +102,11 @@ function Desire({store, item, full}) {
             },
           ]}>
           <FontAwesome name="heart" size={17} color={'#979191'} />
-          <Text style={styles.text}>{item.name}</Text>
+          <Text style={styles.text}>{itemDesire.name}</Text>
         </View>
         {full && (
           <>
-            {item.customer?.email && (
+            {itemDesire.customer?.email && (
               <View
                 style={[
                   styles.itemRow,
@@ -57,20 +116,22 @@ function Desire({store, item, full}) {
                   },
                 ]}>
                 <FontAwesome name="envelope" size={17} color={'#979191'} />
-                <Text style={styles.text}>{item.customer.email}</Text>
+                <Text style={styles.text}>{itemDesire.customer.email}</Text>
               </View>
             )}
-            {item.user_reserved?.store?.name && (
+            {itemDesire.user_reserved?.store?.name && (
               <View style={[styles.itemRow, styles.spacingTop]}>
                 <FontAwesome5 name="store" size={15} color={'#979191'} />
 
-                <Text style={styles.text}>{item.user_reserved.store.name}</Text>
+                <Text style={styles.text}>
+                  {itemDesire.user_reserved.store.name}
+                </Text>
               </View>
             )}
             <View style={styles.spacingTop}>
               <Text style={styles.sectionTitle}>Complementos</Text>
               <Text style={[styles.text, {marginLeft: 0}]}>
-                {item.complements}
+                {itemDesire.complements}
               </Text>
             </View>
 
@@ -78,16 +139,18 @@ function Desire({store, item, full}) {
               <Text style={styles.sectionTitle}>Data de cadastro</Text>
               <View style={styles.itemRow}>
                 <Fontisto name="clock" size={16} color={'#979191'} />
-                <Text style={styles.text}>{formatDate(item.created_at)}</Text>
+                <Text style={styles.text}>
+                  {formatDate(itemDesire.created_at)}
+                </Text>
               </View>
             </View>
-            {item.status >= 2 && item.delivery_forecast && (
+            {itemDesire.status >= 2 && itemDesire.delivery_forecast && (
               <View style={styles.spacingTop}>
                 <Text style={styles.sectionTitle}>Previsão de entrega</Text>
                 <View style={styles.itemRow}>
                   <Fontisto name="clock" size={16} color={'#979191'} />
                   <Text style={styles.text}>
-                    {formatDate(item.delivery_forecast)}
+                    {formatDate(itemDesire.delivery_forecast)}
                   </Text>
                 </View>
               </View>
@@ -100,34 +163,38 @@ function Desire({store, item, full}) {
         <>
           {/* TODO: Caso o status seja maior ou igual a 4 (Respondido pelo cliente), Fazer uma seção para mostrar o que o cliente respondeu */}
 
-          {item.status >= 5 && (
+          {itemDesire.status >= 5 && (
             <>
               <View style={styles.largeSpacingTop} />
               <View style={styles.container}>
                 <Text style={styles.cardTitle}>Detalhes da Venda</Text>
-                {item?.user_origin?.name && (
+                {itemDesire?.user_origin?.name && (
                   <View style={styles.spacingTop}>
                     <Text style={styles.sectionTitle}>Vendedor de Origem</Text>
                     <View style={styles.itemRow}>
                       <FontAwesome name="user" size={18} color={'#979191'} />
-                      <Text style={styles.text}>{item.user_origin.name}</Text>
+                      <Text style={styles.text}>
+                        {itemDesire.user_origin.name}
+                      </Text>
                     </View>
                   </View>
                 )}
-                {item?.user_reserved?.name && (
+                {itemDesire?.user_reserved?.name && (
                   <View style={styles.spacingTop}>
                     <Text style={styles.sectionTitle}>Vendedor da Reserva</Text>
                     <View style={styles.itemRow}>
                       <FontAwesome name="user" size={18} color={'#979191'} />
-                      <Text style={styles.text}>{item.user_reserved.name}</Text>
+                      <Text style={styles.text}>
+                        {itemDesire.user_reserved.name}
+                      </Text>
                     </View>
                   </View>
                 )}
-                {item.product_value && (
+                {itemDesire.product_value && (
                   <View style={styles.spacingTop}>
                     <Text style={styles.sectionTitle}>Valor do Produto</Text>
                     <Text style={[styles.text, {marginLeft: 0}]}>
-                      {formatCurrency(item.product_value)}
+                      {formatCurrency(itemDesire.product_value)}
                     </Text>
                   </View>
                 )}
@@ -136,12 +203,18 @@ function Desire({store, item, full}) {
             </>
           )}
 
-          {!!item?.original_image && (
-            <Product text={'Produto Original'} image={item.original_image} />
+          {!!itemDesire?.original_image && (
+            <Product
+              text={'Produto Original'}
+              image={itemDesire.original_image}
+            />
           )}
 
-          {!!item?.desired_image && (
-            <Product text={'Produto Desejado'} image={item.desired_image} />
+          {!!itemDesire?.desired_image && (
+            <Product
+              text={'Produto Desejado'}
+              image={itemDesire.desired_image}
+            />
           )}
 
           {attemptedToReserv && (
@@ -152,7 +225,7 @@ function Desire({store, item, full}) {
             </>
           )}
 
-          {item.status === 1 && (
+          {itemDesire.status === 1 && (
             <>
               <View style={styles.largeSpacingTop} />
               {attemptedToReserv ? (
@@ -164,34 +237,80 @@ function Desire({store, item, full}) {
                   onPress={() => setAttemptedToReserv(true)}
                 />
               )}
-              {item.user_origin?.id === store.user.id && (
+              {itemDesire.user_origin?.id === store.user.id && (
                 <>
                   <View style={styles.largeSpacingTop} />
-                  <Button type="secondary" text={'Cancelar Desejo'} />
+                  <Button
+                    type="secondary"
+                    text={'Cancelar Desejo'}
+                    onPress={() => setToggleCancelDesireModal(true)}
+                  />
+                  <Modal
+                    transparent={true}
+                    visible={toggleCancelDesireModal}
+                    onRequestClose={() => setToggleCancelDesireModal(false)}>
+                    <ModalChildren
+                      text="Você tem certeza que deseja cancelar o desejo?"
+                      onAction={async action => {
+                        if (action === true) {
+                          await onSubmitCancelDesire();
+                        } else {
+                          setToggleCancelDesireModal(false);
+                        }
+                      }}
+                      errorMessage={modalErrorMessage}
+                      isProcessing={isProcessingModal}
+                      isProcessingMessage="Cancelando Desejo"
+                    />
+                  </Modal>
                 </>
               )}
             </>
           )}
 
-          {item.status === 2 && (
+          {itemDesire.status === 2 && (
             <>
-              {item.user_origin?.id === store.user.id && (
+              {itemDesire.user_origin?.id === store.user.id && (
                 <>
                   <View style={styles.largeSpacingTop} />
                   <Button type="primary" text={'Comunicar ao Cliente'} />
                 </>
               )}
 
-              {item.user_reserved?.id === store.user.id && (
+              {itemDesire.user_reserved?.id === store.user.id && (
                 <>
                   <View style={styles.largeSpacingTop} />
-                  <Button type="secondary" text={'Cancelar Reserva'} />
+                  <Button
+                    type="secondary"
+                    text={'Cancelar Reserva'}
+                    onPress={() => setToggleCancelReservationModal(true)}
+                  />
+                  <Modal
+                    transparent={true}
+                    visible={toggleCancelReservationModal}
+                    onRequestClose={() =>
+                      setToggleCancelReservationModal(false)
+                    }>
+                    <ModalChildren
+                      text="Você tem certeza que deseja cancelar a reserva?"
+                      onAction={async action => {
+                        if (action === true) {
+                          await onSubmitCancelReservation();
+                        } else {
+                          setToggleCancelReservationModal(false);
+                        }
+                      }}
+                      errorMessage={modalErrorMessage}
+                      isProcessing={isProcessingModal}
+                      isProcessingMessage="Cancelando Reserva"
+                    />
+                  </Modal>
                 </>
               )}
             </>
           )}
 
-          {item.status === 4 && (
+          {itemDesire.status === 4 && (
             <>
               {/* TODO: O botão de finalizar venda aparecerá somente para o vendedor que o cliente escolheu no Whatsapp */}
               <>
@@ -270,4 +389,4 @@ function mapStateToProps(state) {
   return {store: state};
 }
 
-export default connect(mapStateToProps, {})(Desire);
+export default connect(mapStateToProps, {setMyDesires})(Desire);

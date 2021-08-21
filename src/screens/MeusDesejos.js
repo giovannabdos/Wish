@@ -14,6 +14,7 @@ import Desire from '../components/Desire';
 import Container from '../components/Container';
 import Select from '../components/Select';
 import ContentEmpty from '../components/ContentEmpty';
+import uuid from 'react-native-uuid';
 
 function MeusDesejos({store, navigation, setMyDesires}) {
   const [isLoading, setIsLoading] = useState(true);
@@ -28,9 +29,15 @@ function MeusDesejos({store, navigation, setMyDesires}) {
       const response = await api.get('/users/my-desires');
 
       const {desires} = response.data;
-      console.log(desires);
 
-      setMyDesires(desires);
+      setMyDesires(
+        desires.map(desire => {
+          return {
+            ...desire,
+            uuid: uuid.v4(),
+          };
+        }),
+      );
       setIsLoading(false);
     } catch (response) {
       setIsLoading(false);
@@ -60,7 +67,7 @@ function MeusDesejos({store, navigation, setMyDesires}) {
                 <Desire item={item} />
               </TouchableOpacity>
             )}
-            keyExtractor={item => item.id}
+            keyExtractor={item => item.uuid}
             refreshControl={
               <RefreshControl
                 colors={['#193E5B']}

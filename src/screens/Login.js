@@ -89,6 +89,7 @@ function Login({setUser, setToken}) {
               setLoginErrorMessage(null);
               setLogin(maskCPF(text));
             }}
+            keyboardType={'numeric'}
             errorMessage={loginErrorMessage}
           />
         </View>
@@ -102,6 +103,7 @@ function Login({setUser, setToken}) {
               setPasswordErrorMessage(null);
               setPassword(text);
             }}
+            autoCapitalize={'none'}
             errorMessage={passwordErrorMessage}
           />
         </View>
