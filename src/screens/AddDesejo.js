@@ -144,6 +144,7 @@ function AddDesejo({store, navigation, setMyDesires}) {
                       const formatedText = maskWhatsapp(text);
                       setFieldValue('whatsapp', formatedText);
                     }}
+                    maxLength={15}
                     errorMessage={
                       touched?.whatsapp && errors?.whatsapp && errors.whatsapp
                     }
