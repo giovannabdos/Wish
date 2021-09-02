@@ -15,6 +15,7 @@ import Container from '../components/Container';
 import Select from '../components/Select';
 import ContentEmpty from '../components/ContentEmpty';
 import uuid from 'react-native-uuid';
+import status from '../utils/desireStatus';
 
 function MeusDesejos({store, navigation, setMyDesires}) {
   const [isLoading, setIsLoading] = useState(true);
@@ -56,7 +57,7 @@ function MeusDesejos({store, navigation, setMyDesires}) {
 
   return (
     <Container component={View}>
-      <Select />
+      <Select list={status} />
       <View style={styles.desiresContainer}>
         {!isLoading ? (
           <FlatList

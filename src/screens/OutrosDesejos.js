@@ -12,6 +12,7 @@ import Desire from '../components/Desire';
 import Container from '../components/Container';
 import Select from '../components/Select';
 import ContentEmpty from '../components/ContentEmpty';
+import status from '../utils/desireStatus';
 
 export default function OutrosDesejos({navigation}) {
   const [desires, setDesires] = useState([]);
@@ -47,7 +48,7 @@ export default function OutrosDesejos({navigation}) {
 
   return (
     <Container component={View}>
-      <Select />
+      <Select list={status} />
       <View style={styles.desiresContainer}>
         {!isLoading ? (
           <FlatList
