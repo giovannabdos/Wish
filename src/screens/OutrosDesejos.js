@@ -23,9 +23,9 @@ export default function OutrosDesejos({navigation}) {
     fetchDesires();
   }, []);
 
-  const fetchDesires = async () => {
+  const fetchDesires = async status => {
     try {
-      const response = await api.get('/users/other-desires');
+      const response = await api.get(`/users/other-desires?status=${status}`);
 
       const {desires} = response.data;
 
@@ -34,6 +34,11 @@ export default function OutrosDesejos({navigation}) {
     } catch (response) {
       setIsLoading(false);
     }
+  };
+
+  const handleOnChangeStatus = status => {
+    setIsLoading(true);
+    fetchDesires(status);
   };
 
   const desiresAlignScrollView = () => {
@@ -48,7 +53,7 @@ export default function OutrosDesejos({navigation}) {
 
   return (
     <Container component={View}>
-      <Select list={status} />
+      <Select list={status} onChange={handleOnChangeStatus} />
       <View style={styles.desiresContainer}>
         {!isLoading ? (
           <FlatList

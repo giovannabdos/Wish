@@ -12,7 +12,7 @@ import SimpleLineIcons from 'react-native-vector-icons/SimpleLineIcons';
 
 const {width, height} = Dimensions.get('window');
 
-export default function Select({list}) {
+export default function Select({list, onChange}) {
   const [visible, setVisible] = useState(false);
   const [selectedIndex, setSelectedIndex] = useState(0);
 
@@ -42,6 +42,7 @@ export default function Select({list}) {
                     key={index}
                     onPress={() => {
                       setSelectedIndex(index);
+                      onChange(index);
                       setVisible(false);
                     }}>
                     <Text

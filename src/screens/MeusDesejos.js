@@ -22,12 +22,12 @@ function MeusDesejos({store, navigation, setMyDesires}) {
   const [isRefreshing, setIsRefreshing] = useState(false);
 
   useEffect(() => {
-    fetchDesires();
+    fetchDesires(0);
   }, []);
 
-  const fetchDesires = async () => {
+  const fetchDesires = async status => {
     try {
-      const response = await api.get('/users/my-desires');
+      const response = await api.get(`/users/my-desires?status=${status}`);
 
       const {desires} = response.data;
 
@@ -45,6 +45,11 @@ function MeusDesejos({store, navigation, setMyDesires}) {
     }
   };
 
+  const handleOnChangeStatus = status => {
+    setIsLoading(true);
+    fetchDesires(status);
+  };
+
   const desiresAlignScrollView = () => {
     if (store.myDesires.length === 0 && !isRefreshing) {
       return {
@@ -57,7 +62,7 @@ function MeusDesejos({store, navigation, setMyDesires}) {
 
   return (
     <Container component={View}>
-      <Select list={status} />
+      <Select list={status} onChange={handleOnChangeStatus} />
       <View style={styles.desiresContainer}>
         {!isLoading ? (
           <FlatList
