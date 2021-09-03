@@ -76,7 +76,6 @@ function AddDesejo({store, navigation, setMyDesires}) {
       let formData = new FormData();
       formData.append('name', values.desire);
       formData.append('complements', values.complements);
-      formData.append('user_origin_id', store.user?.id);
       formData.append('customer_id', customer.id);
       formData.append('original_image', values.original_image);
 
