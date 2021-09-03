@@ -11,6 +11,7 @@ import ProductPicker from '../components/ProductPicker';
 import ErrorMessage from '../components/ErrorMessage';
 import api from '../services/api';
 import {maskWhatsapp} from '../utils/masks';
+import uuid from 'react-native-uuid';
 
 const customerFormSchema = Yup.object().shape({
   whatsapp: Yup.string()
@@ -24,9 +25,11 @@ const customerFormSchema = Yup.object().shape({
 const desireFormSchema = Yup.object().shape({
   desire: Yup.string().required('Campo obrigatório'),
   complements: Yup.string().required('Campo obrigatório'),
-  original_image: Yup.object().shape({
-    uri: Yup.string().required('Imagem obrigatória'),
-  }),
+  original_image: Yup.object()
+    .shape({
+      uri: Yup.string().required('Imagem obrigatória'),
+    })
+    .typeError('Imagem obrigatória'),
 });
 
 function AddDesejo({store, navigation, setMyDesires}) {
@@ -82,7 +85,7 @@ function AddDesejo({store, navigation, setMyDesires}) {
       const {desire} = response.data;
 
       setSubmitting(false);
-      setMyDesires([desire, ...store.myDesires]);
+      setMyDesires([{...desire, uuid: uuid.v4()}, ...store.myDesires]);
       resetForm({});
       setCustomer(null);
       setStep(1);

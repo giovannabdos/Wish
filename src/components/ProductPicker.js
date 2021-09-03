@@ -16,7 +16,7 @@ import ErrorMessage from '../components/ErrorMessage';
 
 // const HORIZONTAL_SPACING = 20;
 
-export default function ProductPicker({value, onChange, errorMessage}) {
+export default function ProductPicker({value, onChange, errorMessage, text}) {
   const [image, setImage] = useState(value || null);
   const [imageHeight, setImageHeight] = useState(0);
 
@@ -141,7 +141,7 @@ export default function ProductPicker({value, onChange, errorMessage}) {
             style={styles.camera}
           />
           <Text style={styles.text}>
-            Tire uma foto do produto {'\n'} ou da etiqueta
+            {text ? text : 'Tire uma foto do produto \n ou da etiqueta'}
           </Text>
         </View>
       )}

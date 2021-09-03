@@ -10,11 +10,23 @@ import Product from './Product';
 import ProductPicker from './ProductPicker';
 import Button from './Button';
 import Input from './Input';
+import ErrorMessage from './ErrorMessage';
 import ModalChildren from './ModalChildren';
 import status from '../utils/desireStatus';
 import {formatDate, formatCurrency} from '../utils/format';
 import {maskWhatsapp} from '../utils/masks';
+import * as Yup from 'yup';
+import {Formik} from 'formik';
 import uuid from 'react-native-uuid';
+
+const reservDesireFormSchema = Yup.object().shape({
+  delivery_forecast: Yup.string().required('Campo obrigatório'),
+  desired_image: Yup.object()
+    .shape({
+      uri: Yup.string().required('Imagem obrigatória'),
+    })
+    .typeError('Imagem obrigatória'),
+});
 
 function Desire({store, item, full, setMyDesires}) {
   const [itemDesire, setItemDesire] = useState(item);
@@ -25,6 +37,7 @@ function Desire({store, item, full, setMyDesires}) {
     useState(false);
   const [isProcessingModal, setIsProcessingModal] = useState(false);
   const [modalErrorMessage, setModalErrorMessage] = useState(null);
+  const [errorMessage, setErrorMessage] = useState(null);
 
   const onSubmitCancelDesire = async () => {
     try {
@@ -68,6 +81,38 @@ function Desire({store, item, full, setMyDesires}) {
         'Houve um erro ao tentar cancelar a reserva, deseja tentar novamente?',
       );
       setIsProcessingModal(false);
+    }
+  };
+
+  const onSubmitReservDesire = async (values, {setSubmitting, resetForm}) => {
+    try {
+      setErrorMessage(null);
+      setSubmitting(true);
+
+      let formData = new FormData();
+      formData.append('delivery_forecast', values.delivery_forecast);
+      formData.append('desired_image', values.desired_image);
+
+      const response = await api.put(
+        `/desires/${itemDesire.id}/reserv`,
+        formData,
+      );
+
+      const {desire} = response.data;
+
+      setSubmitting(false);
+      const newDesires = [...store.myDesires].filter(d => d.id !== desire.id);
+      setMyDesires([{...desire, uuid: uuid.v4()}, ...newDesires]);
+      setItemDesire(desire);
+      resetForm({});
+      setAttemptedToReserv(false);
+    } catch (response) {
+      if (response?.data?.message) {
+        setErrorMessage(response.data.message);
+      } else {
+        setErrorMessage('Houve um erro inesperado, tente novamente');
+      }
+      setSubmitting(false);
     }
   };
 
@@ -219,18 +264,77 @@ function Desire({store, item, full, setMyDesires}) {
 
           {attemptedToReserv && (
             <>
-              <ProductPicker />
-              <View style={styles.largeSpacingTop} />
-              <Input type="primary" label={'Data prevista para entrega'} />
+              <Formik
+                initialValues={{
+                  delivery_forecast: '',
+                  desired_image: null,
+                }}
+                onSubmit={onSubmitReservDesire}
+                validationSchema={reservDesireFormSchema}>
+                {({
+                  values,
+                  errors,
+                  isSubmitting,
+                  touched,
+                  setFieldValue,
+                  setFieldTouched,
+                  handleSubmit,
+                }) => (
+                  <>
+                    <ProductPicker
+                      text={
+                        'Tire uma foto do produto \n ou da etiqueta a ser reservada'
+                      }
+                      value={values.desired_image}
+                      onChange={value => {
+                        setFieldValue('desired_image', value);
+                        setFieldTouched('desired_image', true);
+                      }}
+                      errorMessage={
+                        touched?.desired_image &&
+                        errors?.desired_image &&
+                        errors.desired_image
+                      }
+                    />
+                    <View style={styles.largeSpacingTop} />
+                    <Input
+                      type="primary"
+                      label={'Data prevista para entrega'}
+                      value={values.delivery_forecast}
+                      onChangeDate={value => {
+                        setFieldValue('delivery_forecast', formatDate(value));
+                        setFieldTouched('delivery_forecast', true);
+                      }}
+                      errorMessage={
+                        touched?.delivery_forecast &&
+                        errors?.delivery_forecast &&
+                        errors.delivery_forecast
+                      }
+                      dateTimePickerProps={{
+                        mode: 'datetime',
+                      }}
+                    />
+
+                    <View style={styles.errorContainer}>
+                      <ErrorMessage message={errorMessage} />
+                    </View>
+
+                    <Button
+                      type="primary"
+                      text={'Confirmar Reserva'}
+                      onPress={handleSubmit}
+                      loading={isSubmitting}
+                    />
+                  </>
+                )}
+              </Formik>
             </>
           )}
 
           {itemDesire.status === 1 && (
             <>
               <View style={styles.largeSpacingTop} />
-              {attemptedToReserv ? (
-                <Button type="primary" text={'Confirmar Reserva'} />
-              ) : (
+              {!attemptedToReserv && (
                 <Button
                   type="primary"
                   text={'Reservar Desejo'}
@@ -382,6 +486,9 @@ const styles = StyleSheet.create({
   status: {
     fontFamily: 'Montserrat-Bold',
     fontSize: 13,
+  },
+  errorContainer: {
+    marginBottom: 14,
   },
 });
 

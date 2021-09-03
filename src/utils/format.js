@@ -1,7 +1,10 @@
 import format from 'date-fns/format';
 
 export const formatDate = date => {
-  const parsedDate = new Date(date.replace(' ', 'T'));
+  let parsedDate = date;
+  if (typeof date !== 'object') {
+    parsedDate = new Date(date.replace(' ', 'T'));
+  }
   return format(parsedDate, 'dd/MM/yyyy HH:mm');
 };
 

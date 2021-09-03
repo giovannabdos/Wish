@@ -39,6 +39,7 @@ export default function Select({list}) {
               {list &&
                 list.map((value, index) => (
                   <TouchableWithoutFeedback
+                    key={index}
                     onPress={() => {
                       setSelectedIndex(index);
                       setVisible(false);
