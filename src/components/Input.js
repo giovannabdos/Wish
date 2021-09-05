@@ -17,6 +17,7 @@ export default function Input({
   errorMessage,
   dateTimePickerProps,
   onChangeDate,
+  currency,
   ...props
 }) {
   const [color, setColor] = useState('#000000');
@@ -43,10 +44,19 @@ export default function Input({
       <InputContainer
         style={styles.inputContainer}
         onPress={() => setIsDateTimePickerVisible(true)}>
+        {currency && (
+          <View style={styles.leftIcon}>
+            <Text style={styles.leftIconText}>R$</Text>
+          </View>
+        )}
         <TextInput
           style={[
             styles.input,
-            {borderColor: !!errorMessage ? errorColor : borderColor, color},
+            {
+              borderColor: !!errorMessage ? errorColor : borderColor,
+              color,
+              paddingLeft: currency ? 36 : 0,
+            },
           ]}
           secureTextEntry={secureTextEntry}
           editable={!dateTimePickerProps}
@@ -97,6 +107,15 @@ const styles = StyleSheet.create({
     marginBottom: 3,
     fontFamily: 'Montserrat',
     textAlignVertical: 'top',
+  },
+  leftIcon: {
+    position: 'absolute',
+    left: 8,
+    paddingBottom: 10,
+  },
+  leftIconText: {
+    fontFamily: 'Montserrat',
+    color: '#B0B0B0',
   },
   dateTimePickerIcon: {
     position: 'absolute',
