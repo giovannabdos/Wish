@@ -1,5 +1,5 @@
 import React, {useState} from 'react';
-import {StyleSheet, Text, View} from 'react-native';
+import {StyleSheet, Text, TouchableOpacity, View} from 'react-native';
 import {connect} from 'react-redux';
 import {setMyDesires} from '../redux/actions';
 import * as Yup from 'yup';
@@ -11,6 +11,7 @@ import ProductPicker from '../components/ProductPicker';
 import ErrorMessage from '../components/ErrorMessage';
 import api from '../services/api';
 import {maskWhatsapp} from '../utils/masks';
+import FontAwesome from 'react-native-vector-icons/FontAwesome';
 import uuid from 'react-native-uuid';
 
 const customerFormSchema = Yup.object().shape({
@@ -35,6 +36,8 @@ const desireFormSchema = Yup.object().shape({
 function AddDesejo({store, navigation, setMyDesires}) {
   const [step, setStep] = useState(1);
   const [customer, setCustomer] = useState(null);
+  const [customers, setCustomers] = useState([]);
+  const [showSearch, setShowSearch] = useState(false);
   const [errorMessage, setErrorMessage] = useState(null);
 
   const onSubmitCustomer = async (values, {setSubmitting}) => {
@@ -99,6 +102,24 @@ function AddDesejo({store, navigation, setMyDesires}) {
     }
   };
 
+  const searchCustomers = async whatsapp => {
+    try {
+      const response = await api.get(`/customers/search?whatsapp=${whatsapp}`);
+
+      const {customers} = response.data;
+
+      setCustomers(customers);
+      setShowSearch(true);
+    } catch (response) {}
+  };
+
+  const handleOnSelectCustomer = (c, setFieldValue) => {
+    setFieldValue('whatsapp', maskWhatsapp(c.whatsapp));
+    setFieldValue('name', c.name);
+    setFieldValue('email', c.email);
+    setShowSearch(false);
+  };
+
   return (
     <Container>
       {step === 1 && (
@@ -145,6 +166,9 @@ function AddDesejo({store, navigation, setMyDesires}) {
                     onChangeText={text => {
                       const formatedText = maskWhatsapp(text);
                       setFieldValue('whatsapp', formatedText);
+                      if (text.length >= 5) {
+                        searchCustomers(text);
+                      }
                     }}
                     maxLength={15}
                     errorMessage={
@@ -152,6 +176,41 @@ function AddDesejo({store, navigation, setMyDesires}) {
                     }
                   />
                 </View>
+
+                {customers.length > 0 && showSearch && (
+                  <View style={styles.customersSearchContainer}>
+                    {customers.map((c, index) => (
+                      <TouchableOpacity
+                        key={index}
+                        onPress={() =>
+                          handleOnSelectCustomer(c, setFieldValue)
+                        }>
+                        {index !== 0 && <View style={styles.divider} />}
+                        <View style={styles.customersSearchRow}>
+                          <FontAwesome
+                            name="user"
+                            size={18}
+                            color={'#979191'}
+                          />
+                          <Text style={styles.customersSearchText}>
+                            {c.name}
+                          </Text>
+                        </View>
+                        <View style={styles.customersSearchRow}>
+                          <FontAwesome
+                            name="whatsapp"
+                            size={19}
+                            color={'#979191'}
+                          />
+                          <Text style={styles.customersSearchText}>
+                            {maskWhatsapp(c.whatsapp)}
+                          </Text>
+                        </View>
+                      </TouchableOpacity>
+                    ))}
+                  </View>
+                )}
+
                 <View style={{marginBottom: 14}}>
                   <Input
                     type="primary"
@@ -345,6 +404,28 @@ const styles = StyleSheet.create({
   },
   errorContainer: {
     marginBottom: 14,
+  },
+  customersSearchContainer: {
+    marginTop: -17,
+    marginBottom: 14,
+    backgroundColor: '#ffffff',
+    borderBottomLeftRadius: 15,
+    borderBottomRightRadius: 15,
+    paddingVertical: 8,
+  },
+  customersSearchRow: {
+    flexDirection: 'row',
+    paddingHorizontal: 10,
+  },
+  customersSearchText: {
+    fontFamily: 'Montserrat',
+    fontSize: 14,
+    marginLeft: 8,
+  },
+  divider: {
+    marginVertical: 8,
+    borderTopWidth: 1,
+    borderColor: '#c4c4c4',
   },
 });
 
