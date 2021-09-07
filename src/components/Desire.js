@@ -4,7 +4,7 @@ import {connect} from 'react-redux';
 import FontAwesome from 'react-native-vector-icons/FontAwesome';
 import FontAwesome5 from 'react-native-vector-icons/FontAwesome5';
 import Fontisto from 'react-native-vector-icons/Fontisto';
-import {setMyDesires} from '../redux/actions';
+import {setMyDesires, setOtherDesires} from '../redux/actions';
 import api from '../services/api';
 import Product from './Product';
 import ProductPicker from './ProductPicker';
@@ -32,7 +32,7 @@ const finishDesireFormSchema = Yup.object().shape({
   product_value: Yup.string().required('Campo obrigatório'),
 });
 
-function Desire({store, item, full, setMyDesires}) {
+function Desire({store, item, full, setMyDesires, setOtherDesires}) {
   const [itemDesire, setItemDesire] = useState(item);
   const [attemptedToReserv, setAttemptedToReserv] = useState(false);
   const [attemptedToFinishSale, setAttemptedToFinishSale] = useState(false);
@@ -51,11 +51,13 @@ function Desire({store, item, full, setMyDesires}) {
       const response = await api.put(`/desires/${itemDesire.id}/cancel`, {});
       const {desire} = response.data;
 
-      const newDesires = [...store.myDesires].filter(d => d.id !== desire.id);
-      setMyDesires([{...desire, uuid: uuid.v4()}, ...newDesires]);
+      const newMyDesires = [...store.myDesires].filter(d => d.id !== desire.id);
+      setMyDesires([{...desire, uuid: uuid.v4()}, ...newMyDesires]);
       setItemDesire(desire);
       setIsProcessingModal(false);
       setToggleCancelDesireModal(false);
+      setAttemptedToReserv(false);
+      setAttemptedToFinishSale(false);
     } catch (response) {
       setModalErrorMessage(
         'Houve um erro ao tentar cancelar, deseja tentar novamente?',
@@ -75,11 +77,18 @@ function Desire({store, item, full, setMyDesires}) {
       );
       const {desire} = response.data;
 
-      const newDesires = [...store.myDesires].filter(d => d.id !== desire.id);
-      setMyDesires([{...desire, uuid: uuid.v4()}, ...newDesires]);
+      const newMyDesires = [...store.myDesires].filter(d => d.id !== desire.id);
+      if (desire.user_origin.id === store.user.id) {
+        setMyDesires([{...desire, uuid: uuid.v4()}, ...newMyDesires]);
+      } else {
+        setMyDesires(newMyDesires);
+        setOtherDesires([{...desire, uuid: uuid.v4()}, ...store.otherDesires]);
+      }
       setItemDesire(desire);
       setIsProcessingModal(false);
       setToggleCancelReservationModal(false);
+      setAttemptedToReserv(false);
+      setAttemptedToFinishSale(false);
     } catch (response) {
       setModalErrorMessage(
         'Houve um erro ao tentar cancelar a reserva, deseja tentar novamente?',
@@ -105,11 +114,16 @@ function Desire({store, item, full, setMyDesires}) {
       const {desire} = response.data;
 
       setSubmitting(false);
-      const newDesires = [...store.myDesires].filter(d => d.id !== desire.id);
-      setMyDesires([{...desire, uuid: uuid.v4()}, ...newDesires]);
+      const newMyDesires = [...store.myDesires].filter(d => d.id !== desire.id);
+      const newOtherDesires = [...store.otherDesires].filter(
+        d => d.id !== desire.id,
+      );
+      setMyDesires([{...desire, uuid: uuid.v4()}, ...newMyDesires]);
+      setOtherDesires(newOtherDesires);
       setItemDesire(desire);
       resetForm({});
       setAttemptedToReserv(false);
+      setAttemptedToFinishSale(false);
     } catch (response) {
       if (response?.data?.message) {
         setErrorMessage(response.data.message);
@@ -132,11 +146,12 @@ function Desire({store, item, full, setMyDesires}) {
       const {desire} = response.data;
 
       setSubmitting(false);
-      const newDesires = [...store.myDesires].filter(d => d.id !== desire.id);
-      setMyDesires([{...desire, uuid: uuid.v4()}, ...newDesires]);
+      const newMyDesires = [...store.myDesires].filter(d => d.id !== desire.id);
+      setMyDesires([{...desire, uuid: uuid.v4()}, ...newMyDesires]);
       setItemDesire(desire);
       resetForm({});
-      attemptedToFinishSale(false);
+      setAttemptedToReserv(false);
+      setAttemptedToFinishSale(false);
     } catch (response) {
       if (response?.data?.message) {
         setErrorMessage(response.data.message);
@@ -364,13 +379,15 @@ function Desire({store, item, full, setMyDesires}) {
 
           {itemDesire.status === 1 && (
             <>
-              <View style={styles.largeSpacingTop} />
               {!attemptedToReserv && (
-                <Button
-                  type="primary"
-                  text={'Reservar Desejo'}
-                  onPress={() => setAttemptedToReserv(true)}
-                />
+                <>
+                  <View style={styles.largeSpacingTop} />
+                  <Button
+                    type="primary"
+                    text={'Reservar Desejo'}
+                    onPress={() => setAttemptedToReserv(true)}
+                  />
+                </>
               )}
               {itemDesire.user_origin?.id === store.user.id && (
                 <>
@@ -390,6 +407,7 @@ function Desire({store, item, full, setMyDesires}) {
                         if (action === true) {
                           await onSubmitCancelDesire();
                         } else {
+                          setModalErrorMessage(null);
                           setToggleCancelDesireModal(false);
                         }
                       }}
@@ -432,6 +450,7 @@ function Desire({store, item, full, setMyDesires}) {
                         if (action === true) {
                           await onSubmitCancelReservation();
                         } else {
+                          setModalErrorMessage(null);
                           setToggleCancelReservationModal(false);
                         }
                       }}
@@ -569,4 +588,6 @@ function mapStateToProps(state) {
   return {store: state};
 }
 
-export default connect(mapStateToProps, {setMyDesires})(Desire);
+export default connect(mapStateToProps, {setMyDesires, setOtherDesires})(
+  Desire,
+);

@@ -7,15 +7,17 @@ import {
   RefreshControl,
   ActivityIndicator,
 } from 'react-native';
+import {connect} from 'react-redux';
+import {setOtherDesires} from '../redux/actions';
 import api from '../services/api';
 import Desire from '../components/Desire';
 import Container from '../components/Container';
 import Select from '../components/Select';
 import ContentEmpty from '../components/ContentEmpty';
+import uuid from 'react-native-uuid';
 import status from '../utils/desireStatus';
 
-export default function OutrosDesejos({navigation}) {
-  const [desires, setDesires] = useState([]);
+function OutrosDesejos({store, navigation, setOtherDesires}) {
   const [isLoading, setIsLoading] = useState(true);
   const [isRefreshing, setIsRefreshing] = useState(false);
 
@@ -29,7 +31,14 @@ export default function OutrosDesejos({navigation}) {
 
       const {desires} = response.data;
 
-      setDesires(desires);
+      setOtherDesires(
+        desires.map(desire => {
+          return {
+            ...desire,
+            uuid: uuid.v4(),
+          };
+        }),
+      );
       setIsLoading(false);
     } catch (response) {
       setIsLoading(false);
@@ -42,7 +51,7 @@ export default function OutrosDesejos({navigation}) {
   };
 
   const desiresAlignScrollView = () => {
-    if (desires.length === 0 && !isRefreshing) {
+    if (store.otherDesires.length === 0 && !isRefreshing) {
       return {
         flexGrow: 0.8,
         justifyContent: 'center',
@@ -57,7 +66,7 @@ export default function OutrosDesejos({navigation}) {
       <View style={styles.desiresContainer}>
         {!isLoading ? (
           <FlatList
-            data={desires}
+            data={store.otherDesires}
             renderItem={({item}) => (
               <TouchableOpacity
                 onPress={() => navigation.navigate('MyDesiresDetails', {item})}>
@@ -105,3 +114,9 @@ const styles = StyleSheet.create({
     marginBottom: 100,
   },
 });
+
+function mapStateToProps(state) {
+  return {store: state};
+}
+
+export default connect(mapStateToProps, {setOtherDesires})(OutrosDesejos);
