@@ -5,9 +5,11 @@ import Container from '../components/Container';
 import {clearAll} from '../redux/actions';
 import Button from '../components/Button';
 import Local from '../services/Local';
+import Device from '../services/Device';
 
 function Settings({clearAll}) {
   const logout = async () => {
+    Device.updateUser(null);
     await Local.clear();
     clearAll();
   };

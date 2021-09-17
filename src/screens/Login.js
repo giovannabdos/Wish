@@ -6,6 +6,7 @@ import Logo from '../assets/images/Logo.png';
 import Input from '../components/Input';
 import Button from '../components/Button';
 import Local from '../services/Local';
+import Device from '../services/Device';
 import api from '../services/api';
 import ErrorMessage from '../components/ErrorMessage';
 import {maskCPF} from '../utils/masks';
@@ -51,6 +52,7 @@ function Login({setUser, setToken}) {
 
       const {user, token} = response.data;
 
+      await Device.updateUser(user);
       await Local.setUser(user);
       await Local.setToken(token);
       setUser(user);
