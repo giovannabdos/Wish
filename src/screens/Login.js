@@ -73,8 +73,8 @@ function Login({setUser, setToken}) {
       <View style={styles.contentContainer}>
         <View style={styles.titleContainer}>
           <Text style={styles.title}>
-            Faça seu Login e{' '}
-            <Text style={[styles.title, styles.bold]}>Boas-Vendas</Text>
+            Faça seu Login e{'\n'}
+            <Text style={[styles.title, styles.bold]}>Boas Vendas</Text>
           </Text>
         </View>
 
