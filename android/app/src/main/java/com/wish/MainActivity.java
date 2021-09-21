@@ -1,5 +1,7 @@
 package com.wish;
 
+import android.os.Bundle;
+
 import com.facebook.react.ReactActivity;
 
 public class MainActivity extends ReactActivity {
@@ -11,5 +13,15 @@ public class MainActivity extends ReactActivity {
   @Override
   protected String getMainComponentName() {
     return "wish";
+  }
+
+  @Override
+  protected void onCreate(Bundle savedInstanceState) {
+    super.onCreate(savedInstanceState);
+    //get notification data info
+    Bundle bundle = getIntent().getExtras();
+    if (bundle != null) {
+      //bundle must contain all info sent in "data" field of the notification
+    }
   }
 }
