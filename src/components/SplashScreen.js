@@ -20,12 +20,12 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   logoContainer: {
-    flex: 0.7,
+    flex: 0.8,
     justifyContent: 'center',
   },
   logo: {
-    width: 240,
-    height: 200,
+    width: 189.5232,
+    height: 240,
     alignSelf: 'center',
   },
 });

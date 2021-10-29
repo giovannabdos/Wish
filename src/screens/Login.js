@@ -134,8 +134,8 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   logo: {
-    width: 108,
-    height: 90,
+    width: 102.6584,
+    height: 130,
     alignSelf: 'center',
   },
   contentContainer: {
