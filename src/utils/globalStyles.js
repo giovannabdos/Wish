@@ -8,17 +8,20 @@ export const defaultHeader = {
       name="arrow-left"
       size={20}
       style={{marginLeft: Platform.OS === 'ios' ? 14 : 0}}
+      color="#ffffff"
     />
   ),
   headerBackTitleVisible: false,
   headerStyle: {
     elevation: 0,
     shadowOpacity: 0,
+    backgroundColor: '#193E5B',
   },
   headerTitleStyle: {
     fontFamily: 'Montserrat',
     fontSize: 18,
     fontWeight: 'normal',
+    color: '#ffffff'
   },
   headerTitleAlign: 'left',
 };
