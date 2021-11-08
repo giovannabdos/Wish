@@ -7,8 +7,6 @@ import {
   Image,
   PermissionsAndroid,
   Dimensions,
-  Modal,
-  TouchableWithoutFeedback,
 } from 'react-native';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 import {launchCamera, launchImageLibrary} from 'react-native-image-picker';
@@ -122,16 +120,17 @@ export default function ProductPicker({value, onChange, errorMessage, text}) {
     };
 
     launchCamera(options, async responseImage => {
-      if (responseImage.uri) {
+      const file = responseImage.assets?.[0];
+      if (file) {
         // ajusteContainerImagem(responseImage);
-        const imageName = responseImage.fileName;
+        const imageName = file.fileName;
         if (!imageName) {
-          imageName = getImageName(responseImage.uri);
+          imageName = getImageName(file.uri);
         }
         const image = {
-          uri: responseImage.uri,
+          uri: file.uri,
           name: imageName,
-          type: responseImage.type,
+          type: file.type,
         };
         setImage(image);
         onChange(image);
@@ -145,16 +144,17 @@ export default function ProductPicker({value, onChange, errorMessage, text}) {
     };
 
     launchImageLibrary(options, async responseImage => {
-      if (responseImage.uri) {
+      const file = responseImage.assets?.[0];
+      if (file) {
         // ajusteContainerImagem(responseImage);
-        const imageName = responseImage.fileName;
+        const imageName = file.fileName;
         if (!imageName) {
-          imageName = getImageName(responseImage.uri);
+          imageName = getImageName(file.uri);
         }
         const image = {
-          uri: responseImage.uri,
+          uri: file.uri,
           name: imageName,
-          type: responseImage.type,
+          type: file.type,
         };
         setImage(image);
         onChange(image);
