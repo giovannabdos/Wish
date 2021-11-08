@@ -36,7 +36,10 @@ function OutrosDesejosStack() {
       <Stack.Screen
         name="MyDesiresDetails"
         component={DesejoDetalhes}
-        options={{...defaultHeader, headerTitle: 'Detalhes do Desejo'}}
+        options={{
+          ...defaultHeader,
+          headerTitle: 'Detalhes do Desejo',
+        }}
       />
     </Stack.Navigator>
   );

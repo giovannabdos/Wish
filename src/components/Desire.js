@@ -1,5 +1,6 @@
-import React, {useState} from 'react';
-import {StyleSheet, View, Text, Modal} from 'react-native';
+import React, {useState, useEffect} from 'react';
+import {StyleSheet, View, Text, Modal, TouchableOpacity} from 'react-native';
+import Clipboard from '@react-native-clipboard/clipboard';
 import {connect} from 'react-redux';
 import FontAwesome from 'react-native-vector-icons/FontAwesome';
 import FontAwesome5 from 'react-native-vector-icons/FontAwesome5';
@@ -12,15 +13,28 @@ import Button from './Button';
 import Input from './Input';
 import ErrorMessage from './ErrorMessage';
 import ModalChildren from './ModalChildren';
+import CheckBox from './CheckBox';
 import status from '../utils/desireStatus';
 import {formatDate, formatCurrency} from '../utils/format';
 import {maskCurrency, maskWhatsapp} from '../utils/masks';
 import * as Yup from 'yup';
 import {Formik} from 'formik';
 import uuid from 'react-native-uuid';
+import Feather from 'react-native-vector-icons/Feather';
+import {useNavigation} from '@react-navigation/native';
 
 const reservDesireFormSchema = Yup.object().shape({
-  delivery_forecast: Yup.string().required('Campo obrigatório'),
+  product_already_available: Yup.boolean(),
+  delivery_forecast: Yup.string().test(
+    'product_already_available',
+    'Campo obrigatório',
+    function (value) {
+      if (this.parent.product_already_available && !value) {
+        return false;
+      }
+      return true;
+    },
+  ),
   desired_image: Yup.object()
     .shape({
       uri: Yup.string().required('Imagem obrigatória'),
@@ -28,11 +42,27 @@ const reservDesireFormSchema = Yup.object().shape({
     .typeError('Imagem obrigatória'),
 });
 
+// const updateDesireReservedFormSchema = Yup.object().shape({
+//   product_already_available: Yup.boolean(),
+//   delivery_forecast: Yup.string().test(
+//     'product_already_available',
+//     'Campo obrigatório',
+//     function (value) {
+//       if (!this.parent.product_already_available && !value) {
+//         return false;
+//       }
+//       return true;
+//     },
+//   ),
+// });
+
 const finishDesireFormSchema = Yup.object().shape({
   product_value: Yup.string().required('Campo obrigatório'),
 });
 
-function Desire({store, item, full, setMyDesires, setOtherDesires}) {
+function Desire({store, item, full = false, setMyDesires, setOtherDesires}) {
+  const navigation = useNavigation();
+
   const [itemDesire, setItemDesire] = useState(item);
   const [attemptedToReserv, setAttemptedToReserv] = useState(false);
   const [attemptedToFinishSale, setAttemptedToFinishSale] = useState(false);
@@ -42,6 +72,51 @@ function Desire({store, item, full, setMyDesires, setOtherDesires}) {
   const [isProcessingModal, setIsProcessingModal] = useState(false);
   const [modalErrorMessage, setModalErrorMessage] = useState(null);
   const [errorMessage, setErrorMessage] = useState(null);
+  const [isEditing, setIsEditing] = useState(false);
+
+  // useEffect(() => {
+  //   if (full && (itemDesire.status === 2 || itemDesire.status === 3)) {
+  //     navigation.setOptions({
+  //       headerRight: () => (
+  //         <Feather
+  //           name="edit-2"
+  //           size={20}
+  //           style={{marginRight: 14}}
+  //           color="#ffffff"
+  //           onPress={() => setIsEditing(true)}
+  //         />
+  //       ),
+  //     });
+  //   }
+  // }, [navigation, full, itemDesire.status]);
+
+  // useEffect(() => {
+  //   if (full) {
+  //     if (isEditing) {
+  //       navigation.setOptions({
+  //         headerRight: () => (
+  //           <TouchableOpacity
+  //             style={styles.cancelEdition}
+  //             onPress={() => setIsEditing(false)}>
+  //             <Text style={styles.cancelEditionText}>Cancelar</Text>
+  //           </TouchableOpacity>
+  //         ),
+  //       });
+  //     } else {
+  //       navigation.setOptions({
+  //         headerRight: () => (
+  //           <Feather
+  //             name="edit-2"
+  //             size={20}
+  //             style={{marginRight: 14}}
+  //             color="#ffffff"
+  //             onPress={() => setIsEditing(true)}
+  //           />
+  //         ),
+  //       });
+  //     }
+  //   }
+  // }, [isEditing]);
 
   const onSubmitCancelDesire = async () => {
     try {
@@ -103,7 +178,14 @@ function Desire({store, item, full, setMyDesires, setOtherDesires}) {
       setSubmitting(true);
 
       let formData = new FormData();
-      formData.append('delivery_forecast', values.delivery_forecast);
+      // formData.append(
+      //   'product_already_available',
+      //   values.product_already_available,
+      // );
+      // formData.append(
+      //   'delivery_forecast',
+      //   !values.product_already_available ? values.delivery_forecast : null,
+      // );
       formData.append('desired_image', values.desired_image);
 
       const response = await api.put(
@@ -134,6 +216,51 @@ function Desire({store, item, full, setMyDesires, setOtherDesires}) {
     }
   };
 
+  // const onSubmitUpdateDesireReserved = async (
+  //   values,
+  //   {setSubmitting, resetForm},
+  // ) => {
+  //   try {
+  //     setErrorMessage(null);
+  //     setSubmitting(true);
+
+  //     let formData = new FormData();
+  //     formData.append(
+  //       'product_already_available',
+  //       values.product_already_available,
+  //     );
+  //     formData.append(
+  //       'delivery_forecast',
+  //       !values.product_already_available ? values.delivery_forecast : null,
+  //     );
+
+  //     const response = await api.put(
+  //       `/desires/${itemDesire.id}/update_reserved`,
+  //       formData,
+  //     );
+
+  //     const {desire} = response.data;
+
+  //     setSubmitting(false);
+  //     const newMyDesires = [...store.myDesires].filter(d => d.id !== desire.id);
+  //     const newOtherDesires = [...store.otherDesires].filter(
+  //       d => d.id !== desire.id,
+  //     );
+  //     setMyDesires([{...desire, uuid: uuid.v4()}, ...newMyDesires]);
+  //     setOtherDesires(newOtherDesires);
+  //     setItemDesire(desire);
+  //     resetForm({});
+  //     setIsEditing(false);
+  //   } catch (response) {
+  //     if (response?.data?.message) {
+  //       setErrorMessage(response.data.message);
+  //     } else {
+  //       setErrorMessage('Houve um erro inesperado, tente novamente');
+  //     }
+  //     setSubmitting(false);
+  //   }
+  // };
+
   const onSubmitFinishDesire = async (values, {setSubmitting, resetForm}) => {
     try {
       setErrorMessage(null);
@@ -152,6 +279,39 @@ function Desire({store, item, full, setMyDesires, setOtherDesires}) {
       resetForm({});
       setAttemptedToReserv(false);
       setAttemptedToFinishSale(false);
+    } catch (response) {
+      if (response?.data?.message) {
+        setErrorMessage(response.data.message);
+      } else {
+        setErrorMessage('Houve um erro inesperado, tente novamente');
+      }
+      setSubmitting(false);
+    }
+  };
+
+  const onSubmitCommunicateCustomer = async (
+    values,
+    {setSubmitting, resetForm},
+  ) => {
+    try {
+      setErrorMessage(null);
+      setSubmitting(true);
+
+      const response = await api.put(
+        `/desires/${itemDesire.id}/communicate-customer`,
+      );
+
+      const {desire} = response.data;
+
+      setSubmitting(false);
+      const newMyDesires = [...store.myDesires].filter(d => d.id !== desire.id);
+      const newOtherDesires = [...store.otherDesires].filter(
+        d => d.id !== desire.id,
+      );
+      setMyDesires([{...desire, uuid: uuid.v4()}, ...newMyDesires]);
+      setOtherDesires(newOtherDesires);
+      setItemDesire(desire);
+      resetForm({});
     } catch (response) {
       if (response?.data?.message) {
         setErrorMessage(response.data.message);
@@ -197,7 +357,7 @@ function Desire({store, item, full, setMyDesires, setOtherDesires}) {
         </View>
         {full && (
           <>
-            {itemDesire.customer?.email && (
+            {itemDesire.customer?.email ? (
               <View
                 style={[
                   styles.itemRow,
@@ -209,7 +369,7 @@ function Desire({store, item, full, setMyDesires, setOtherDesires}) {
                 <FontAwesome name="envelope" size={17} color={'#979191'} />
                 <Text style={styles.text}>{itemDesire.customer.email}</Text>
               </View>
-            )}
+            ) : null}
             {itemDesire.user_reserved?.store?.name && (
               <View style={[styles.itemRow, styles.spacingTop]}>
                 <FontAwesome5 name="store" size={15} color={'#979191'} />
@@ -235,9 +395,26 @@ function Desire({store, item, full, setMyDesires, setOtherDesires}) {
                 </Text>
               </View>
             </View>
-            {itemDesire.status >= 2 && itemDesire.delivery_forecast && (
+
+            {itemDesire.key && (
               <View style={styles.spacingTop}>
-                <Text style={styles.sectionTitle}>Previsão de entrega</Text>
+                <Text style={styles.sectionTitle}>Código</Text>
+                <View style={styles.keyContainer}>
+                  <Text style={[styles.text, {marginLeft: 0}]}>
+                    {itemDesire.key}
+                  </Text>
+                  <TouchableOpacity
+                    onPress={() => Clipboard.setString(itemDesire.key)}>
+                    <Feather name="copy" size={20} color="#B0AEAE" />
+                  </TouchableOpacity>
+                </View>
+              </View>
+            )}
+            {/* {itemDesire.status >= 2 && itemDesire.delivery_forecast && (
+              <View style={styles.spacingTop}>
+                <Text style={styles.sectionTitle}>
+                  Previsão para chegar na loja
+                </Text>
                 <View style={styles.itemRow}>
                   <Fontisto name="clock" size={16} color={'#979191'} />
                   <Text style={styles.text}>
@@ -246,13 +423,64 @@ function Desire({store, item, full, setMyDesires, setOtherDesires}) {
                 </View>
               </View>
             )}
+            {itemDesire.status >= 2 && itemDesire.product_already_available && (
+              <View style={styles.spacingTop}>
+                <Text style={styles.sectionTitle}>
+                  O produto já está disponível na loja
+                </Text>
+              </View>
+            )} */}
             <View style={styles.largeSpacingTop} />
           </>
         )}
       </View>
       {full && (
         <>
-          {/* TODO: Caso o status seja maior ou igual a 4 (Respondido pelo cliente), Fazer uma seção para mostrar o que o cliente respondeu */}
+          {itemDesire.status >= 4 && itemDesire.customer_response && (
+            <>
+              <View style={styles.largeSpacingTop} />
+              <View style={styles.container}>
+                <Text style={styles.cardTitle}>Resposta do cliente</Text>
+                {itemDesire.customer_response === 'origin' ? (
+                  <Text style={[styles.text, {marginLeft: 0}]}>
+                    O cliente quer retirar o produto na loja de origem{' '}
+                    <Text style={styles.bold}>
+                      {itemDesire.user_origin.store.name}
+                    </Text>
+                  </Text>
+                ) : itemDesire.customer_response === 'reserved' ? (
+                  <Text style={[styles.text, {marginLeft: 0}]}>
+                    O cliente quer retirar o produto na loja que fez a reserva{' '}
+                    <Text style={styles.bold}>
+                      {itemDesire.user_reserved.store.name}
+                    </Text>
+                  </Text>
+                ) : itemDesire.customer_response === 'ecommerce' ? (
+                  <Text style={[styles.text, {marginLeft: 0}]}>
+                    O cliente quer fazer a compra do produto pelo Ecommerce
+                  </Text>
+                ) : (
+                  itemDesire.customer_response === 'no' && (
+                    <Text style={[styles.text, {marginLeft: 0}]}>
+                      O cliente não deseja mais este produto
+                    </Text>
+                  )
+                )}
+
+                <View style={styles.spacingTop}>
+                  <Text style={styles.sectionTitle}>Data da resposta</Text>
+                  <View style={styles.itemRow}>
+                    <Fontisto name="clock" size={16} color={'#979191'} />
+                    <Text style={styles.text}>
+                      {formatDate(itemDesire.customer_response_at)}
+                    </Text>
+                  </View>
+                </View>
+
+                <View style={styles.largeSpacingTop} />
+              </View>
+            </>
+          )}
 
           {itemDesire.status >= 5 && (
             <>
@@ -312,7 +540,8 @@ function Desire({store, item, full, setMyDesires, setOtherDesires}) {
             <>
               <Formik
                 initialValues={{
-                  delivery_forecast: '',
+                  // product_already_available: false,
+                  // delivery_forecast: '',
                   desired_image: null,
                 }}
                 onSubmit={onSubmitReservDesire}
@@ -342,24 +571,49 @@ function Desire({store, item, full, setMyDesires, setOtherDesires}) {
                         errors.desired_image
                       }
                     />
-                    <View style={styles.largeSpacingTop} />
-                    <Input
-                      type="primary"
-                      label={'Data prevista para entrega'}
-                      value={values.delivery_forecast}
-                      onChangeDate={value => {
-                        setFieldValue('delivery_forecast', formatDate(value));
-                        setFieldTouched('delivery_forecast', true);
+                    {/* <View style={styles.largeSpacingTop} />
+                    <CheckBox
+                      label="Produto já está disponível na loja"
+                      initialValue={values.product_already_available}
+                      onChange={value => {
+                        setFieldValue('product_already_available', value);
+                        setFieldTouched('product_already_available', true);
+                        if (value) {
+                          setFieldValue('delivery_forecast', '');
+                          setFieldTouched('delivery_forecast', true);
+                        }
                       }}
                       errorMessage={
-                        touched?.delivery_forecast &&
-                        errors?.delivery_forecast &&
-                        errors.delivery_forecast
+                        touched?.product_already_available &&
+                        errors?.product_already_available &&
+                        errors.product_already_available
                       }
-                      dateTimePickerProps={{
-                        mode: 'datetime',
-                      }}
                     />
+                    {!values.product_already_available && (
+                      <>
+                        <View style={styles.largeSpacingTop} />
+                        <Input
+                          type="primary"
+                          label={'Data prevista para chegar na loja'}
+                          value={values.delivery_forecast}
+                          onChangeDate={value => {
+                            setFieldValue(
+                              'delivery_forecast',
+                              formatDate(value),
+                            );
+                            setFieldTouched('delivery_forecast', true);
+                          }}
+                          errorMessage={
+                            touched?.delivery_forecast &&
+                            errors?.delivery_forecast &&
+                            errors.delivery_forecast
+                          }
+                          dateTimePickerProps={{
+                            mode: 'datetime',
+                          }}
+                        />
+                      </>
+                    )} */}
 
                     <View style={styles.errorContainer}>
                       <ErrorMessage message={errorMessage} />
@@ -376,6 +630,91 @@ function Desire({store, item, full, setMyDesires, setOtherDesires}) {
               </Formik>
             </>
           )}
+
+          {/* {isEditing && (
+            <>
+              <Formik
+                initialValues={{
+                  product_already_available:
+                    itemDesire.product_already_available,
+                  delivery_forecast: !itemDesire.product_already_available
+                    ? formatDate(itemDesire.delivery_forecast)
+                    : '',
+                }}
+                onSubmit={onSubmitUpdateDesireReserved}
+                validationSchema={updateDesireReservedFormSchema}>
+                {({
+                  values,
+                  errors,
+                  isSubmitting,
+                  touched,
+                  setFieldValue,
+                  setFieldTouched,
+                  handleSubmit,
+                }) => (
+                  <>
+                    <View style={styles.largeSpacingTop} />
+
+                    <CheckBox
+                      label="Produto já está disponível na loja"
+                      initialValue={values.product_already_available}
+                      onChange={value => {
+                        setFieldValue('product_already_available', value);
+                        setFieldTouched('product_already_available', true);
+                        if (value) {
+                          setFieldValue('delivery_forecast', '');
+                          setFieldTouched('delivery_forecast', true);
+                        }
+                      }}
+                      errorMessage={
+                        touched?.product_already_available &&
+                        errors?.product_already_available &&
+                        errors.product_already_available
+                      }
+                    />
+
+                    {!values.product_already_available && (
+                      <>
+                        <View style={styles.largeSpacingTop} />
+                        <Input
+                          type="primary"
+                          label={'Data prevista para chegar na loja'}
+                          value={values.delivery_forecast}
+                          onChangeDate={value => {
+                            setFieldValue(
+                              'delivery_forecast',
+                              formatDate(value),
+                            );
+                            setFieldTouched('delivery_forecast', true);
+                          }}
+                          errorMessage={
+                            touched?.delivery_forecast &&
+                            errors?.delivery_forecast &&
+                            errors.delivery_forecast
+                          }
+                          dateTimePickerProps={{
+                            mode: 'datetime',
+                          }}
+                        />
+                      </>
+                    )}
+
+                    <View style={styles.errorContainer}>
+                      <ErrorMessage message={errorMessage} />
+                    </View>
+                    {console.log(errors)}
+
+                    <Button
+                      type="primary"
+                      text={'Atualizar Desejo'}
+                      onPress={handleSubmit}
+                      loading={isSubmitting}
+                    />
+                  </>
+                )}
+              </Formik>
+            </>
+          )} */}
 
           {itemDesire.status === 1 && (
             <>
@@ -421,13 +760,27 @@ function Desire({store, item, full, setMyDesires, setOtherDesires}) {
             </>
           )}
 
-          {itemDesire.status === 2 && (
+          {itemDesire.status === 2 && !isEditing && (
             <>
               {itemDesire.user_origin?.id === store.user.id && (
-                <>
-                  <View style={styles.largeSpacingTop} />
-                  <Button type="primary" text={'Comunicar ao Cliente'} />
-                </>
+                <Formik
+                  initialValues={{}}
+                  onSubmit={onSubmitCommunicateCustomer}>
+                  {({isSubmitting, handleSubmit}) => (
+                    <>
+                      <View style={styles.largeSpacingTop} />
+
+                      <Button
+                        type="primary"
+                        text={'Comunicar ao Cliente'}
+                        onPress={handleSubmit}
+                        loading={isSubmitting}
+                      />
+
+                      <ErrorMessage message={errorMessage} />
+                    </>
+                  )}
+                </Formik>
               )}
 
               {itemDesire.user_reserved?.id === store.user.id && (
@@ -581,6 +934,26 @@ const styles = StyleSheet.create({
   },
   errorContainer: {
     marginBottom: 14,
+  },
+  cancelEdition: {
+    marginRight: 14,
+  },
+  cancelEditionText: {
+    color: '#ffffff',
+    fontFamily: 'Montserrat',
+    fontSize: 12,
+  },
+  keyContainer: {
+    backgroundColor: '#EBEBEB',
+    borderRadius: 20,
+    paddingVertical: 6,
+    paddingHorizontal: 10,
+    marginTop: 3,
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+  },
+  bold: {
+    fontWeight: 'bold',
   },
 });
 
