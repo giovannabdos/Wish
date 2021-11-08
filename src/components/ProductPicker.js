@@ -1,4 +1,4 @@
-import React, {useState} from 'react';
+import React, {useState, useRef} from 'react';
 import {
   StyleSheet,
   View,
@@ -7,18 +7,23 @@ import {
   Image,
   PermissionsAndroid,
   Dimensions,
+  Modal,
+  TouchableWithoutFeedback,
 } from 'react-native';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
-import ImagePicker from 'react-native-image-picker';
+import {launchCamera, launchImageLibrary} from 'react-native-image-picker';
 import ErrorMessage from '../components/ErrorMessage';
+import ModalSelectable from '../components/ModalSelectable';
 
-// const {width, height} = Dimensions.get('window');
+const {width, height} = Dimensions.get('window');
 
 // const HORIZONTAL_SPACING = 20;
 
 export default function ProductPicker({value, onChange, errorMessage, text}) {
   const [image, setImage] = useState(value || null);
   const [imageHeight, setImageHeight] = useState(0);
+
+  const modalSelectableRef = useRef(null);
 
   const requestCameraPermission = async () => {
     try {
@@ -80,18 +85,66 @@ export default function ProductPicker({value, onChange, errorMessage, text}) {
   //   }
   // };
 
-  const handleImagePicker = () => {
+  // const handleImagePicker = () => {
+  //   if (!requestCameraPermission()) return false;
+
+  //   const options = {
+  //     title: 'Selecionar imagem',
+  //     cancelButtonTitle: 'Cancelar',
+  //     takePhotoButtonTitle: 'Câmera',
+  //     chooseFromLibraryButtonTitle: 'Galeria',
+  //     rotation: 360,
+  //   };
+
+  //   ImagePicker.showImagePicker(options, async responseImage => {
+  //     if (responseImage.uri) {
+  //       // ajusteContainerImagem(responseImage);
+  //       const imageName = responseImage.fileName;
+  //       if (!imageName) {
+  //         imageName = getImageName(responseImage.uri);
+  //       }
+  //       const image = {
+  //         uri: responseImage.uri,
+  //         name: imageName,
+  //         type: responseImage.type,
+  //       };
+  //       setImage(image);
+  //       onChange(image);
+  //     }
+  //   });
+  // };
+
+  const handleLaunchCamera = () => {
     if (!requestCameraPermission()) return false;
 
     const options = {
-      title: 'Selecionar imagem',
-      cancelButtonTitle: 'Cancelar',
-      takePhotoButtonTitle: 'Câmera',
-      chooseFromLibraryButtonTitle: 'Galeria',
-      rotation: 360,
+      mediaType: 'photo',
     };
 
-    ImagePicker.showImagePicker(options, async responseImage => {
+    launchCamera(options, async responseImage => {
+      if (responseImage.uri) {
+        // ajusteContainerImagem(responseImage);
+        const imageName = responseImage.fileName;
+        if (!imageName) {
+          imageName = getImageName(responseImage.uri);
+        }
+        const image = {
+          uri: responseImage.uri,
+          name: imageName,
+          type: responseImage.type,
+        };
+        setImage(image);
+        onChange(image);
+      }
+    });
+  };
+
+  const handleLaunchImageLibrary = () => {
+    const options = {
+      mediaType: 'photo',
+    };
+
+    launchImageLibrary(options, async responseImage => {
       if (responseImage.uri) {
         // ajusteContainerImagem(responseImage);
         const imageName = responseImage.fileName;
@@ -110,7 +163,8 @@ export default function ProductPicker({value, onChange, errorMessage, text}) {
   };
 
   return (
-    <TouchableOpacity onPress={() => handleImagePicker()}>
+    <TouchableOpacity
+      onPress={() => modalSelectableRef?.current?.setVisible(true)}>
       {!!image ? (
         <View style={styles.containerImage}>
           <Image
@@ -143,6 +197,18 @@ export default function ProductPicker({value, onChange, errorMessage, text}) {
           <Text style={styles.text}>
             {text ? text : 'Tire uma foto do produto \n ou da etiqueta'}
           </Text>
+          <ModalSelectable
+            ref={modalSelectableRef}
+            list={[{name: 'Câmera'}, {name: 'Galeria'}]}
+            onChange={index => {
+              if (index === 0) {
+                handleLaunchCamera();
+              } else {
+                handleLaunchImageLibrary();
+              }
+            }}
+            selectable={false}
+          />
         </View>
       )}
       {!!errorMessage && (
@@ -178,5 +244,25 @@ const styles = StyleSheet.create({
   },
   errorMessageContainer: {
     marginTop: 3,
+  },
+  modalContainer: {
+    width,
+    height,
+    backgroundColor: '#00000040',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  modalBox: {
+    backgroundColor: '#fff',
+    width: width <= 324 ? width - 24 : 300,
+    paddingHorizontal: 30,
+    paddingVertical: 15,
+    borderRadius: 20,
+  },
+  modalText: {
+    marginVertical: 10,
+    fontFamily: 'Montserrat',
+    fontSize: 16,
+    color: '#000',
   },
 });

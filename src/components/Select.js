@@ -1,27 +1,21 @@
-import React, {useState} from 'react';
-import {
-  StyleSheet,
-  View,
-  Text,
-  Modal,
-  Dimensions,
-  TouchableOpacity,
-  TouchableWithoutFeedback,
-} from 'react-native';
+import React, {useRef} from 'react';
+import {StyleSheet, Text, Dimensions, TouchableOpacity} from 'react-native';
 import SimpleLineIcons from 'react-native-vector-icons/SimpleLineIcons';
+import ModalSelectable from './ModalSelectable';
 
 const {width, height} = Dimensions.get('window');
 
 export default function Select({list, onChange}) {
-  const [visible, setVisible] = useState(false);
-  const [selectedIndex, setSelectedIndex] = useState(0);
+  const modalSelectableRef = useRef(null);
 
   return (
     <>
       <TouchableOpacity
         style={styles.container}
-        onPress={() => setVisible(true)}>
-        <Text style={styles.text}>{list[selectedIndex].name}</Text>
+        onPress={() => modalSelectableRef?.current?.setVisible(true)}>
+        <Text style={styles.text}>
+          {list[modalSelectableRef?.current?.getSelectedIndex || 0].name}
+        </Text>
         <SimpleLineIcons
           name="arrow-down"
           size={20}
@@ -29,41 +23,12 @@ export default function Select({list, onChange}) {
           style={{marginTop: 10, marginBottom: 10, marginRight: 10}}
         />
       </TouchableOpacity>
-      <Modal
-        transparent={true}
-        visible={visible}
-        onRequestClose={() => setVisible(false)}>
-        <TouchableWithoutFeedback onPress={() => setVisible(false)}>
-          <View style={styles.modalContainer}>
-            <View style={styles.modalBox}>
-              {list &&
-                list.map((value, index) => (
-                  <TouchableWithoutFeedback
-                    key={index}
-                    onPress={() => {
-                      setSelectedIndex(index);
-                      onChange(index);
-                      setVisible(false);
-                    }}>
-                    <Text
-                      style={[
-                        styles.modalText,
-                        {
-                          color: index === selectedIndex ? '#193E5B' : '#000',
-                          fontFamily:
-                            index === selectedIndex
-                              ? 'Montserrat-SemiBold'
-                              : 'Montserrat',
-                        },
-                      ]}>
-                      {value.name}
-                    </Text>
-                  </TouchableWithoutFeedback>
-                ))}
-            </View>
-          </View>
-        </TouchableWithoutFeedback>
-      </Modal>
+      <ModalSelectable
+        ref={modalSelectableRef}
+        list={list}
+        onChange={index => onChange(index)}
+        initialSelected={0}
+      />
     </>
   );
 }
