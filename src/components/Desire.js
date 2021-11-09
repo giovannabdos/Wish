@@ -384,7 +384,7 @@ function Desire({store, item, full = false, setMyDesires, setOtherDesires}) {
             <View style={styles.spacingTop}>
               <Text style={styles.sectionTitle}>Complementos</Text>
               <Text style={[styles.text, {marginLeft: 0}]}>
-                {itemDesire.complements}
+                {itemDesire.complements.trim()}
               </Text>
             </View>
 
