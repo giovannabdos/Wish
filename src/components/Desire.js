@@ -16,7 +16,7 @@ import ModalChildren from './ModalChildren';
 import CheckBox from './CheckBox';
 import status from '../utils/desireStatus';
 import {formatDate, formatCurrency} from '../utils/format';
-import {maskCurrency, maskWhatsapp} from '../utils/masks';
+import {maskCurrency, maskWhatsapp, maskNumber} from '../utils/masks';
 import * as Yup from 'yup';
 import {Formik} from 'formik';
 import uuid from 'react-native-uuid';
@@ -24,17 +24,18 @@ import Feather from 'react-native-vector-icons/Feather';
 import {useNavigation} from '@react-navigation/native';
 
 const reservDesireFormSchema = Yup.object().shape({
-  product_already_available: Yup.boolean(),
-  delivery_forecast: Yup.string().test(
-    'product_already_available',
-    'Campo obrigatório',
-    function (value) {
-      if (this.parent.product_already_available && !value) {
-        return false;
-      }
-      return true;
-    },
-  ),
+  // product_already_available: Yup.boolean(),
+  // delivery_forecast: Yup.string().test(
+  //   'product_already_available',
+  //   'Campo obrigatório',
+  //   function (value) {
+  //     if (this.parent.product_already_available && !value) {
+  //       return false;
+  //     }
+  //     return true;
+  //   },
+  // ),
+  delivery_forecast: Yup.string().required('Campo obrigatório'),
   desired_image: Yup.object()
     .shape({
       uri: Yup.string().required('Imagem obrigatória'),
@@ -186,6 +187,7 @@ function Desire({store, item, full = false, setMyDesires, setOtherDesires}) {
       //   'delivery_forecast',
       //   !values.product_already_available ? values.delivery_forecast : null,
       // );
+      formData.append('delivery_forecast', values.delivery_forecast);
       formData.append('desired_image', values.desired_image);
 
       const response = await api.put(
@@ -410,20 +412,21 @@ function Desire({store, item, full = false, setMyDesires, setOtherDesires}) {
                 </View>
               </View>
             )}
-            {/* {itemDesire.status >= 2 && itemDesire.delivery_forecast && (
+            {itemDesire.status >= 2 && itemDesire.delivery_forecast && (
               <View style={styles.spacingTop}>
                 <Text style={styles.sectionTitle}>
-                  Previsão para chegar na loja
+                  Previsão de entrega a partir da confirmação do cliente (em
+                  horas)
                 </Text>
                 <View style={styles.itemRow}>
                   <Fontisto name="clock" size={16} color={'#979191'} />
                   <Text style={styles.text}>
-                    {formatDate(itemDesire.delivery_forecast)}
+                    {itemDesire.delivery_forecast} horas
                   </Text>
                 </View>
               </View>
             )}
-            {itemDesire.status >= 2 && itemDesire.product_already_available && (
+            {/* {itemDesire.status >= 2 && itemDesire.product_already_available && (
               <View style={styles.spacingTop}>
                 <Text style={styles.sectionTitle}>
                   O produto já está disponível na loja
@@ -541,7 +544,7 @@ function Desire({store, item, full = false, setMyDesires, setOtherDesires}) {
               <Formik
                 initialValues={{
                   // product_already_available: false,
-                  // delivery_forecast: '',
+                  delivery_forecast: '',
                   desired_image: null,
                 }}
                 onSubmit={onSubmitReservDesire}
@@ -614,6 +617,26 @@ function Desire({store, item, full = false, setMyDesires, setOtherDesires}) {
                         />
                       </>
                     )} */}
+                    <View style={styles.largeSpacingTop} />
+                    <Input
+                      type="primary"
+                      label={
+                        'Previsão de entrega a partir da confirmação do cliente (em horas)'
+                      }
+                      value={values.delivery_forecast}
+                      onChangeText={text => {
+                        const formatedText = maskNumber(text);
+                        setFieldValue('delivery_forecast', formatedText);
+                        setFieldTouched('delivery_forecast', true);
+                      }}
+                      keyboardType="number-pad"
+                      maxLength={10}
+                      errorMessage={
+                        touched?.delivery_forecast &&
+                        errors?.delivery_forecast &&
+                        errors.delivery_forecast
+                      }
+                    />
 
                     <View style={styles.errorContainer}>
                       <ErrorMessage message={errorMessage} />
@@ -702,7 +725,6 @@ function Desire({store, item, full = false, setMyDesires, setOtherDesires}) {
                     <View style={styles.errorContainer}>
                       <ErrorMessage message={errorMessage} />
                     </View>
-                    {console.log(errors)}
 
                     <Button
                       type="primary"

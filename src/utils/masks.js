@@ -20,3 +20,7 @@ export const maskCurrency = value => {
   value = value.replace('.', ',').replace(/(\d)(\d{3}),/g, '$1.$2,');
   return value;
 };
+
+export const maskNumber = value => {
+  return value.replace(/\D/g, '');
+};
