@@ -170,6 +170,7 @@ function AddDesejo({store, navigation, setMyDesires}) {
                         searchCustomers(text);
                       }
                     }}
+                    keyboardType="number-pad"
                     maxLength={15}
                     errorMessage={
                       touched?.whatsapp && errors?.whatsapp && errors.whatsapp

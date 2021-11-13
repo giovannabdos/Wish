@@ -23,18 +23,15 @@ import uuid from 'react-native-uuid';
 import Feather from 'react-native-vector-icons/Feather';
 import {useNavigation} from '@react-navigation/native';
 
-const reservDesireFormSchema = Yup.object().shape({
-  // product_already_available: Yup.boolean(),
-  // delivery_forecast: Yup.string().test(
-  //   'product_already_available',
-  //   'Campo obrigatório',
-  //   function (value) {
-  //     if (this.parent.product_already_available && !value) {
-  //       return false;
-  //     }
-  //     return true;
-  //   },
-  // ),
+const reservDesireToSameStoreFormSchema = Yup.object().shape({
+  desired_image: Yup.object()
+    .shape({
+      uri: Yup.string().required('Imagem obrigatória'),
+    })
+    .typeError('Imagem obrigatória'),
+});
+
+const reservDesireToOtherStoreFormSchema = Yup.object().shape({
   delivery_forecast: Yup.string().required('Campo obrigatório'),
   desired_image: Yup.object()
     .shape({
@@ -183,11 +180,12 @@ function Desire({store, item, full = false, setMyDesires, setOtherDesires}) {
       //   'product_already_available',
       //   values.product_already_available,
       // );
-      // formData.append(
-      //   'delivery_forecast',
-      //   !values.product_already_available ? values.delivery_forecast : null,
-      // );
-      formData.append('delivery_forecast', values.delivery_forecast);
+      // if (!values.product_already_available) {
+      //   formData.append('delivery_forecast', values.delivery_forecast);
+      // }
+      if (itemDesire.user_origin.store.id !== store.user.store.id) {
+        formData.append('delivery_forecast', values.delivery_forecast);
+      }
       formData.append('desired_image', values.desired_image);
 
       const response = await api.put(
@@ -415,8 +413,8 @@ function Desire({store, item, full = false, setMyDesires, setOtherDesires}) {
             {itemDesire.status >= 2 && itemDesire.delivery_forecast && (
               <View style={styles.spacingTop}>
                 <Text style={styles.sectionTitle}>
-                  Previsão de entrega a partir da confirmação do cliente (em
-                  horas)
+                  Previsão de chegada na loja de cadastro a partir da
+                  confirmação do cliente (em horas)
                 </Text>
                 <View style={styles.itemRow}>
                   <Fontisto name="clock" size={16} color={'#979191'} />
@@ -429,7 +427,7 @@ function Desire({store, item, full = false, setMyDesires, setOtherDesires}) {
             {/* {itemDesire.status >= 2 && itemDesire.product_already_available && (
               <View style={styles.spacingTop}>
                 <Text style={styles.sectionTitle}>
-                  O produto já está disponível na loja
+                  O produto já está disponível para retirada
                 </Text>
               </View>
             )} */}
@@ -548,7 +546,11 @@ function Desire({store, item, full = false, setMyDesires, setOtherDesires}) {
                   desired_image: null,
                 }}
                 onSubmit={onSubmitReservDesire}
-                validationSchema={reservDesireFormSchema}>
+                validationSchema={
+                  itemDesire.user_origin.store.id !== store.user.store.id
+                    ? reservDesireToOtherStoreFormSchema
+                    : reservDesireToSameStoreFormSchema
+                }>
                 {({
                   values,
                   errors,
@@ -576,7 +578,7 @@ function Desire({store, item, full = false, setMyDesires, setOtherDesires}) {
                     />
                     {/* <View style={styles.largeSpacingTop} />
                     <CheckBox
-                      label="Produto já está disponível na loja"
+                      label="Produto já está disponível para retirada"
                       initialValue={values.product_already_available}
                       onChange={value => {
                         setFieldValue('product_already_available', value);
@@ -591,8 +593,8 @@ function Desire({store, item, full = false, setMyDesires, setOtherDesires}) {
                         errors?.product_already_available &&
                         errors.product_already_available
                       }
-                    />
-                    {!values.product_already_available && (
+                    /> */}
+                    {/* {!values.product_already_available && (
                       <>
                         <View style={styles.largeSpacingTop} />
                         <Input
@@ -617,26 +619,37 @@ function Desire({store, item, full = false, setMyDesires, setOtherDesires}) {
                         />
                       </>
                     )} */}
-                    <View style={styles.largeSpacingTop} />
-                    <Input
-                      type="primary"
-                      label={
-                        'Previsão de entrega a partir da confirmação do cliente (em horas)'
-                      }
-                      value={values.delivery_forecast}
-                      onChangeText={text => {
-                        const formatedText = maskNumber(text);
-                        setFieldValue('delivery_forecast', formatedText);
-                        setFieldTouched('delivery_forecast', true);
-                      }}
-                      keyboardType="number-pad"
-                      maxLength={10}
-                      errorMessage={
-                        touched?.delivery_forecast &&
-                        errors?.delivery_forecast &&
-                        errors.delivery_forecast
-                      }
-                    />
+
+                    {/* {!values.product_already_available && (
+                      <> */}
+                    {itemDesire.user_origin.store.id !==
+                      store.user.store.id && (
+                      <>
+                        <View style={styles.largeSpacingTop} />
+                        <Input
+                          type="primary"
+                          label={
+                            'Previsão de chegada na loja de cadastro a partir da confirmação do cliente (em horas)'
+                          }
+                          value={values.delivery_forecast}
+                          onChangeText={text => {
+                            const formatedText = maskNumber(text);
+                            setFieldValue('delivery_forecast', formatedText);
+                            setFieldTouched('delivery_forecast', true);
+                          }}
+                          keyboardType="number-pad"
+                          maxLength={10}
+                          errorMessage={
+                            touched?.delivery_forecast &&
+                            errors?.delivery_forecast &&
+                            errors.delivery_forecast
+                          }
+                        />
+                      </>
+                    )}
+
+                    {/* </>
+                    )} */}
 
                     <View style={styles.errorContainer}>
                       <ErrorMessage message={errorMessage} />
