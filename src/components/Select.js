@@ -1,4 +1,4 @@
-import React, {useRef} from 'react';
+import React, {useState, useRef} from 'react';
 import {StyleSheet, Text, Dimensions, TouchableOpacity} from 'react-native';
 import SimpleLineIcons from 'react-native-vector-icons/SimpleLineIcons';
 import ModalSelectable from './ModalSelectable';
@@ -8,14 +8,14 @@ const {width, height} = Dimensions.get('window');
 export default function Select({list, onChange}) {
   const modalSelectableRef = useRef(null);
 
+  const [selectedIndex, setSelectedIndex] = useState(0);
+
   return (
     <>
       <TouchableOpacity
         style={styles.container}
         onPress={() => modalSelectableRef?.current?.setVisible(true)}>
-        <Text style={styles.text}>
-          {list[modalSelectableRef?.current?.getSelectedIndex || 0].name}
-        </Text>
+        <Text style={styles.text}>{list[selectedIndex].name}</Text>
         <SimpleLineIcons
           name="arrow-down"
           size={20}
@@ -26,7 +26,10 @@ export default function Select({list, onChange}) {
       <ModalSelectable
         ref={modalSelectableRef}
         list={list}
-        onChange={index => onChange(index)}
+        onChange={index => {
+          setSelectedIndex(index);
+          onChange(index);
+        }}
         initialSelected={0}
       />
     </>

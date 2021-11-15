@@ -22,9 +22,8 @@ const ModalSelectable = forwardRef(
       ref,
       () => ({
         setVisible: value => setVisible(value),
-        getSelectedIndex: selectedIndex,
       }),
-      [selectedIndex],
+      [],
     );
 
     return (
@@ -87,7 +86,7 @@ const styles = StyleSheet.create({
     borderRadius: 20,
   },
   modalText: {
-    marginVertical: 10,
+    paddingVertical: 10,
     fontFamily: 'Montserrat',
     fontSize: 16,
     color: '#000',
