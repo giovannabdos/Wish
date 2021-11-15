@@ -5,13 +5,14 @@ import ModalSelectable from './ModalSelectable';
 
 const {width, height} = Dimensions.get('window');
 
-export default function Select({list, onChange}) {
+export default function Select({list, label, onChange}) {
   const modalSelectableRef = useRef(null);
 
   const [selectedIndex, setSelectedIndex] = useState(0);
 
   return (
     <>
+      {label && <Text style={styles.label}>{label}</Text>}
       <TouchableOpacity
         style={styles.container}
         onPress={() => modalSelectableRef?.current?.setVisible(true)}>
@@ -71,5 +72,11 @@ const styles = StyleSheet.create({
     marginVertical: 10,
     fontFamily: 'Montserrat',
     fontSize: 16,
+  },
+  label: {
+    fontFamily: 'Montserrat',
+    fontSize: 13,
+    marginLeft: 12,
+    marginBottom: 5,
   },
 });
