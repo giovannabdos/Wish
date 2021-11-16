@@ -197,20 +197,20 @@ export default function ProductPicker({value, onChange, errorMessage, text}) {
           <Text style={styles.text}>
             {text ? text : 'Tire uma foto do produto \n ou da etiqueta'}
           </Text>
-          <ModalSelectable
-            ref={modalSelectableRef}
-            list={[{name: 'Câmera'}, {name: 'Galeria'}]}
-            onChange={index => {
-              if (index === 0) {
-                handleLaunchCamera();
-              } else {
-                handleLaunchImageLibrary();
-              }
-            }}
-            selectable={false}
-          />
         </View>
       )}
+      <ModalSelectable
+        ref={modalSelectableRef}
+        list={[{name: 'Câmera'}, {name: 'Galeria'}]}
+        onChange={index => {
+          if (index === 0) {
+            handleLaunchCamera();
+          } else {
+            handleLaunchImageLibrary();
+          }
+        }}
+        selectable={false}
+      />
       {!!errorMessage && (
         <View style={styles.errorMessageContainer}>
           <ErrorMessage message={errorMessage} />
