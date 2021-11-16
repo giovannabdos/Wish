@@ -16,7 +16,7 @@ import uuid from 'react-native-uuid';
 
 const customerFormSchema = Yup.object().shape({
   whatsapp: Yup.string()
-    .min(14, 'Número iválido')
+    .min(14, 'Número inválido')
     .max(15, 'Número inválido')
     .required('Campo obrigatório'),
   name: Yup.string().required('Campo obrigatório'),
