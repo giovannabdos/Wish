@@ -23,10 +23,6 @@ export default function Mais() {
     <Container style={styles.container}>
       <View style={styles.row}>
         <TouchableOpacity style={styles.button}>
-          <MaterialCommunityIcons name="chart-line" size={35} color="#4D4D4D" />
-          <Text style={styles.text}>Relatórios</Text>
-        </TouchableOpacity>
-        <TouchableOpacity style={styles.button}>
           <FontAwesome name="user" size={35} color="#4D4D4D" />
           <Text style={styles.text}>Meu Perfil</Text>
         </TouchableOpacity>

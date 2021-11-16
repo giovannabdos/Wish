@@ -4,7 +4,7 @@ import Login from './screens/Login';
 import MeusDesejos from './screens/MeusDesejos';
 import DesejoDetalhes from './screens/DesejoDetalhes';
 import OutrosDesejos from './screens/OutrosDesejos';
-import MinhasVendas from './screens/MinhasVendas';
+import Consultas from './screens/Consultas';
 import AddDesejo from './screens/AddDesejo';
 import Settings from './screens/Settings';
 import Mais from './screens/Mais';
@@ -13,6 +13,7 @@ import {createBottomTabNavigator} from '@react-navigation/bottom-tabs';
 import {createStackNavigator} from '@react-navigation/stack';
 import FontAwesome from 'react-native-vector-icons/FontAwesome';
 import FontAwesome5 from 'react-native-vector-icons/FontAwesome5';
+import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 import Local from './services/Local';
 import {setUser, setToken} from './redux/actions';
 import SplashScreen from './components/SplashScreen';
@@ -82,16 +83,16 @@ function AddDesejoStack() {
   );
 }
 
-function MinhasVendasStack() {
+function ConsultasStack() {
   return (
     <Stack.Navigator>
       <Stack.Screen
-        name="MySales"
-        component={MinhasVendas}
+        name="Reports"
+        component={Consultas}
         options={{
           ...defaultHeader,
           headerLeft: () => null,
-          headerTitle: 'Minhas Vendas',
+          headerTitle: 'Consultas',
         }}
       />
     </Stack.Navigator>
@@ -168,11 +169,11 @@ function Tabs() {
         }}
       />
       <Tab.Screen
-        name="Minhas Vendas"
-        component={MinhasVendasStack}
+        name="Consultas"
+        component={ConsultasStack}
         options={{
           tabBarIcon: ({color}) => (
-            <FontAwesome5 name="donate" size={20} color={color} />
+            <MaterialCommunityIcons name="chart-line" size={20} color={color} />
           ),
         }}
       />
