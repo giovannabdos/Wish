@@ -40,7 +40,7 @@ function AddDesejo({store, navigation, setMyDesires}) {
   const [showSearch, setShowSearch] = useState(false);
   const [errorMessage, setErrorMessage] = useState(null);
 
-  const onSubmitCustomer = async (values, {setSubmitting}) => {
+  const onSubmitCustomer = async (values, {setSubmitting, setErrors}) => {
     try {
       setErrorMessage(null);
       setSubmitting(true);
@@ -56,14 +56,16 @@ function AddDesejo({store, navigation, setMyDesires}) {
       const {customer_id} = response.data;
 
       setCustomer({
-        id: customer_id,
         ...values,
+        id: customer_id,
       });
       setSubmitting(false);
       setStep(2);
     } catch (response) {
       if (response?.data?.message) {
         setErrorMessage(response.data.message);
+      } else if (response?.data?.errors) {
+        setErrors(response.data.errors);
       } else {
         setErrorMessage('Houve um erro inesperado, tente novamente');
       }
@@ -324,6 +326,9 @@ function AddDesejo({store, navigation, setMyDesires}) {
                     }
                   />
                 </View>
+                <View style={styles.errorContainer}>
+                  <ErrorMessage message={errorMessage} />
+                </View>
                 <View style={{marginBottom: 10}}>
                   <Button
                     type="primary"
@@ -336,7 +341,10 @@ function AddDesejo({store, navigation, setMyDesires}) {
                   <Button
                     type="secondary"
                     text={'Voltar'}
-                    onPress={() => setStep(1)}
+                    onPress={() => {
+                      setErrorMessage(null);
+                      setStep(1);
+                    }}
                   />
                 </View>
               </>

@@ -804,15 +804,18 @@ function Desire({store, item, full = false, setMyDesires, setOtherDesires}) {
                   {({isSubmitting, handleSubmit}) => (
                     <>
                       <View style={styles.largeSpacingTop} />
-
+                      {errorMessage && (
+                        <>
+                          <ErrorMessage message={errorMessage} />
+                          <View style={styles.largeSpacingTop} />
+                        </>
+                      )}
                       <Button
                         type="primary"
                         text={'Comunicar ao Cliente'}
                         onPress={handleSubmit}
                         loading={isSubmitting}
                       />
-
-                      <ErrorMessage message={errorMessage} />
                     </>
                   )}
                 </Formik>
