@@ -4,32 +4,33 @@ import Container from '../components/Container';
 import DateRange from '../components/DateRange';
 import Select from '../components/Select';
 import LineChart from '../components/LineChart';
+import ErrorMessage from '../components/ErrorMessage';
 import queryBuilder from '../utils/queryBuilder';
 import api from '../services/api';
 
 const reportTypeList = [
   {
     name: 'Quantidade de vendas',
-    value: 'sales_amount'
+    value: 'sales_amount',
   },
   {
     name: 'Total de vendas em R$',
-    value: 'total_sales'
+    value: 'total_sales',
   },
   {
     name: 'Clientes captados',
-    value: 'customers_captured'
+    value: 'customers_captured',
   },
 ];
 
 const reportSellersList = [
   {
     name: 'Todos os vendedores',
-    value: 'all'
+    value: 'all',
   },
   {
     name: 'Somente eu',
-    value: 'me'
+    value: 'me',
   },
 ];
 
@@ -44,10 +45,11 @@ const lineChartData = {
 export default function Consultas() {
   const dateRangeRef = useRef(null);
 
-  const [query, setQuery] = useState({})
-  const [initialFetched, setInitialFetched] = useState(false)
-  const [isLoading, setIsLoading] = useState(false)
-  const [reportData, setReportData] = useState(null)
+  const [query, setQuery] = useState({});
+  const [initialFetched, setInitialFetched] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
+  const [reportData, setReportData] = useState(null);
+  const [errorMessage, setErrorMessage] = useState(null);
 
   useEffect(() => {
     if (initialFetched) {
@@ -56,30 +58,35 @@ export default function Consultas() {
       setQuery({
         ...dateRangeRef.current.initialRange,
         report_type: reportTypeList[0].value,
-        sellers: reportSellersList[0].value
-      })
-      setInitialFetched(true)
+        sellers: reportSellersList[0].value,
+      });
+      setInitialFetched(true);
     }
   }, [query]);
 
   const fetchReport = async query => {
     try {
+      setErrorMessage(null);
       setIsLoading(true);
       const response = await api.get(`/reports/seller${queryBuilder(query)}`);
-      setReportData(response.data)
+      setReportData(response.data);
       setIsLoading(false);
     } catch (response) {
-      console.log(response)
+      if (response?.data?.message) {
+        setErrorMessage(response.data.message);
+      } else {
+        setErrorMessage('Houve um erro inesperado, tente novamente');
+      }
       setIsLoading(false);
     }
   };
 
-  const handleChangeQuery = (value) => {
+  const handleChangeQuery = value => {
     setQuery({
       ...query,
-      ...value
-    })
-  }
+      ...value,
+    });
+  };
 
   return (
     <Container>
@@ -91,7 +98,7 @@ export default function Consultas() {
       <Select
         label="Tipo do relatório"
         list={reportTypeList}
-        onChange={(selected) => handleChangeQuery({report_type: selected.value})}
+        onChange={selected => handleChangeQuery({report_type: selected.value})}
       />
       <Select
         label="Vendedores"
@@ -100,9 +107,11 @@ export default function Consultas() {
       />
       {isLoading ? (
         <ActivityIndicator color={'#193E5B'} size={40} style={styles.loading} />
-      ) : reportData && (
-        <LineChart data={reportData} />
+      ) : (
+        reportData && <LineChart data={reportData} />
       )}
+
+      <ErrorMessage message={errorMessage} />
     </Container>
   );
 }
@@ -112,6 +121,6 @@ const styles = StyleSheet.create({
     marginTop: 10,
   },
   loading: {
-    marginTop: 100
-  }
+    marginTop: 100,
+  },
 });
