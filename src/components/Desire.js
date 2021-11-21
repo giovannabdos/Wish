@@ -396,7 +396,7 @@ function Desire({store, item, full = false, setMyDesires, setOtherDesires}) {
               </View>
             </View>
 
-            {itemDesire.key && (
+            {!!itemDesire.key && (
               <View style={styles.spacingTop}>
                 <Text style={styles.sectionTitle}>Código</Text>
                 <View style={styles.keyContainer}>
@@ -410,7 +410,8 @@ function Desire({store, item, full = false, setMyDesires, setOtherDesires}) {
                 </View>
               </View>
             )}
-            {itemDesire.status >= 2 && itemDesire.delivery_forecast && (
+
+            {itemDesire.status >= 2 && !!itemDesire.delivery_forecast && (
               <View style={styles.spacingTop}>
                 <Text style={styles.sectionTitle}>
                   Previsão de chegada na loja de cadastro a partir da
@@ -483,18 +484,29 @@ function Desire({store, item, full = false, setMyDesires, setOtherDesires}) {
             </>
           )}
 
-          {itemDesire.status >= 5 && (
+          {itemDesire.status >= 2 && (
             <>
               <View style={styles.largeSpacingTop} />
               <View style={styles.container}>
-                <Text style={styles.cardTitle}>Detalhes da Venda</Text>
+                <Text style={styles.cardTitle}>Vendedores</Text>
                 {itemDesire?.user_origin?.name && (
                   <View style={styles.spacingTop}>
                     <Text style={styles.sectionTitle}>Vendedor de Origem</Text>
                     <View style={styles.itemRow}>
-                      <FontAwesome name="user" size={18} color={'#979191'} />
+                      <FontAwesome
+                        name="user"
+                        size={19}
+                        color={'#979191'}
+                        style={styles.userIcon}
+                      />
                       <Text style={styles.text}>
                         {itemDesire.user_origin.name}
+                      </Text>
+                    </View>
+                    <View style={[styles.itemRow, styles.spacingTop]}>
+                      <FontAwesome5 name="store" size={15} color={'#979191'} />
+                      <Text style={styles.text}>
+                        {itemDesire.user_origin.store.name}
                       </Text>
                     </View>
                   </View>
@@ -503,14 +515,25 @@ function Desire({store, item, full = false, setMyDesires, setOtherDesires}) {
                   <View style={styles.spacingTop}>
                     <Text style={styles.sectionTitle}>Vendedor da Reserva</Text>
                     <View style={styles.itemRow}>
-                      <FontAwesome name="user" size={18} color={'#979191'} />
+                      <FontAwesome
+                        name="user"
+                        size={19}
+                        color={'#979191'}
+                        style={styles.userIcon}
+                      />
                       <Text style={styles.text}>
                         {itemDesire.user_reserved.name}
                       </Text>
                     </View>
+                    <View style={[styles.itemRow, styles.spacingTop]}>
+                      <FontAwesome5 name="store" size={15} color={'#979191'} />
+                      <Text style={styles.text}>
+                        {itemDesire.user_reserved.store.name}
+                      </Text>
+                    </View>
                   </View>
                 )}
-                {itemDesire.product_value && (
+                {!!itemDesire.product_value && (
                   <View style={styles.spacingTop}>
                     <Text style={styles.sectionTitle}>Valor do Produto</Text>
                     <Text style={[styles.text, {marginLeft: 0}]}>
@@ -992,6 +1015,9 @@ const styles = StyleSheet.create({
   },
   bold: {
     fontWeight: 'bold',
+  },
+  userIcon: {
+    marginLeft: 2,
   },
 });
 

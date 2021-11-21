@@ -29,7 +29,7 @@ export default function Select({list, label, onChange}) {
         list={list}
         onChange={index => {
           setSelectedIndex(index);
-          onChange(index);
+          onChange(list[index], index);
         }}
         initialSelected={0}
       />

@@ -45,9 +45,9 @@ function OutrosDesejos({store, navigation, setOtherDesires}) {
     }
   };
 
-  const handleOnChangeStatus = status => {
+  const handleOnChangeStatus = (value, index) => {
     setIsLoading(true);
-    fetchDesires(status);
+    fetchDesires(index);
   };
 
   const desiresAlignScrollView = () => {

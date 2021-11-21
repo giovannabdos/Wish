@@ -17,6 +17,17 @@ export default function LineChart({data}) {
     }
     return 1;
   }, [data]);
+  
+  const segments = useMemo(() => {
+    uniqueItems = [...new Set([].concat(...data.datasets))]
+    if (uniqueItems.length <= 2) {
+      return 2
+    }
+    if (uniqueItems.length < 5) {
+      return uniqueItems.length - 1
+    }
+    return 4
+  }, [data])
 
   const offsetAxis = useMemo(() => {
     if (yAxisBiggestTextLength === 1 || yAxisBiggestTextLength === 2) {
@@ -102,6 +113,7 @@ export default function LineChart({data}) {
           width={width - 20 + offsetAxis + offsetLabels}
           height={300}
           yAxisSuffix={yAxisSuffix}
+          segments={segments}
           chartConfig={{
             backgroundColor: '#fff',
             backgroundGradientFrom: '#fff',
