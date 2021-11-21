@@ -3,7 +3,7 @@ import {View, Text, StyleSheet, TouchableOpacity} from 'react-native';
 import FontAwesome5 from 'react-native-vector-icons/FontAwesome5';
 import SimpleLineIcons from 'react-native-vector-icons/SimpleLineIcons';
 import DateTimePickerModal from 'react-native-modal-datetime-picker';
-import startOfMonth from 'date-fns/startOfMonth';
+import startOfYear from 'date-fns/startOfYear';
 import startOfToday from 'date-fns/startOfToday';
 import format from 'date-fns/format';
 
@@ -11,7 +11,7 @@ const FORMAT_DATE_TO_API = 'yyyy/MM/dd';
 const FORMAT_DATE_TO_VIEW = 'dd MMM yyyy';
 
 const DateRange = forwardRef(({onChange}, ref) => {
-  const [startDate, setStartDate] = useState(startOfMonth(new Date()));
+  const [startDate, setStartDate] = useState(startOfYear(new Date()));
   const [endDate, setEndDate] = useState(startOfToday(new Date()));
   const [datePickerType, setDatePickerType] = useState('start');
   const [isDateTimePickerVisible, setIsDateTimePickerVisible] = useState(false);
