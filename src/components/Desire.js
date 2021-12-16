@@ -370,15 +370,16 @@ function Desire({store, item, full = false, setMyDesires, setOtherDesires}) {
                 <Text style={styles.text}>{itemDesire.customer.email}</Text>
               </View>
             ) : null}
-            {itemDesire.user_reserved?.store?.name && (
-              <View style={[styles.itemRow, styles.spacingTop]}>
-                <FontAwesome5 name="store" size={15} color={'#979191'} />
+            {itemDesire.user_reserved?.store?.name &&
+              !(itemDesire.status >= 4 && itemDesire.customer_response) && (
+                <View style={[styles.itemRow, styles.spacingTop]}>
+                  <FontAwesome5 name="store" size={15} color={'#979191'} />
 
-                <Text style={styles.text}>
-                  {itemDesire.user_reserved.store.name}
-                </Text>
-              </View>
-            )}
+                  <Text style={styles.text}>
+                    {itemDesire.user_reserved.store.name}
+                  </Text>
+                </View>
+              )}
             <View style={styles.spacingTop}>
               <Text style={styles.sectionTitle}>Complementos</Text>
               <Text style={[styles.text, {marginLeft: 0}]}>
@@ -878,72 +879,76 @@ function Desire({store, item, full = false, setMyDesires, setOtherDesires}) {
             </>
           )}
 
-          {itemDesire.status === 4 && (
-            <>
-              {/* TODO: O botão de finalizar venda aparecerá somente para o vendedor que o cliente escolheu no Whatsapp */}
+          {itemDesire.status === 4 &&
+            (((itemDesire.customer_response === 'origin' ||
+              itemDesire.customer_response === 'ecommerce') &&
+              store.user.id === itemDesire.user_origin.id) ||
+              (itemDesire.customer_response === 'reserved' &&
+                store.user.id === itemDesire.user_reserved.id)) && (
               <>
-                <View style={styles.largeSpacingTop} />
-                {attemptedToFinishSale ? (
-                  <>
-                    <Formik
-                      initialValues={{
-                        product_value: '',
-                      }}
-                      onSubmit={onSubmitFinishDesire}
-                      validationSchema={finishDesireFormSchema}>
-                      {({
-                        values,
-                        errors,
-                        isSubmitting,
-                        touched,
-                        setFieldValue,
-                        setFieldTouched,
-                        handleSubmit,
-                      }) => (
-                        <>
-                          <Input
-                            type="primary"
-                            label={'Valor do produto'}
-                            currency
-                            value={values.product_value}
-                            onChangeText={text => {
-                              const formatedText = maskCurrency(text);
-                              setFieldValue('product_value', formatedText);
-                              setFieldTouched('product_value', true);
-                            }}
-                            maxLength={10}
-                            errorMessage={
-                              touched?.product_value &&
-                              errors?.product_value &&
-                              errors.product_value
-                            }
-                          />
-                          <View style={styles.largeSpacingTop} />
+                <>
+                  <View style={styles.largeSpacingTop} />
+                  {attemptedToFinishSale ? (
+                    <>
+                      <Formik
+                        initialValues={{
+                          product_value: '',
+                        }}
+                        onSubmit={onSubmitFinishDesire}
+                        validationSchema={finishDesireFormSchema}>
+                        {({
+                          values,
+                          errors,
+                          isSubmitting,
+                          touched,
+                          setFieldValue,
+                          setFieldTouched,
+                          handleSubmit,
+                        }) => (
+                          <>
+                            <Input
+                              type="primary"
+                              label={'Valor do produto'}
+                              currency
+                              value={values.product_value}
+                              onChangeText={text => {
+                                const formatedText = maskCurrency(text);
+                                setFieldValue('product_value', formatedText);
+                                setFieldTouched('product_value', true);
+                              }}
+                              maxLength={10}
+                              errorMessage={
+                                touched?.product_value &&
+                                errors?.product_value &&
+                                errors.product_value
+                              }
+                            />
+                            <View style={styles.largeSpacingTop} />
 
-                          <View style={styles.errorContainer}>
-                            <ErrorMessage message={errorMessage} />
-                          </View>
+                            <View style={styles.errorContainer}>
+                              <ErrorMessage message={errorMessage} />
+                            </View>
 
-                          <Button
-                            type="primary"
-                            text={'Confirmar Finalização da Venda'}
-                            onPress={handleSubmit}
-                            loading={isSubmitting}
-                          />
-                        </>
-                      )}
-                    </Formik>
-                  </>
-                ) : (
-                  <Button
-                    type="primary"
-                    text={'Finalizar Venda'}
-                    onPress={() => setAttemptedToFinishSale(true)}
-                  />
-                )}
+                            <Button
+                              type="primary"
+                              text={'Confirmar Finalização da Venda'}
+                              onPress={handleSubmit}
+                              loading={isSubmitting}
+                            />
+                          </>
+                        )}
+                      </Formik>
+                    </>
+                  ) : (
+                    <Button
+                      type="primary"
+                      text={'Finalizar Venda'}
+                      onPress={() => setAttemptedToFinishSale(true)}
+                    />
+                  )}
+                </>
               </>
-            </>
-          )}
+            )}
 
           <View style={styles.largeSpacingTop} />
           <View style={styles.largeSpacingTop} />
