@@ -85,7 +85,7 @@ function Login({setUser, setToken}) {
         <View style={styles.cpf}>
           <Input
             type="secondary"
-            label={'CPF ou matrícula'}
+            label={'CPF'}
             value={login}
             onChangeText={text => {
               setLoginErrorMessage(null);
