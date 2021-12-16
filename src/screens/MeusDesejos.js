@@ -9,6 +9,7 @@ import {
 } from 'react-native';
 import {connect} from 'react-redux';
 import {setMyDesires} from '../redux/actions';
+import Ionicons from 'react-native-vector-icons/Ionicons';
 import api from '../services/api';
 import Desire from '../components/Desire';
 import Container from '../components/Container';
@@ -22,6 +23,19 @@ function MeusDesejos({store, navigation, setMyDesires}) {
   const [isRefreshing, setIsRefreshing] = useState(false);
 
   useEffect(() => {
+    navigation.setOptions({
+      headerRight: () => (
+        <View style={{marginRight: 10}}>
+          <Ionicons
+            name="refresh"
+            size={26}
+            color="#fff"
+            onPress={() => handleOnRefresh()}
+          />
+        </View>
+      ),
+    });
+
     fetchDesires(0);
   }, []);
 
@@ -50,6 +64,12 @@ function MeusDesejos({store, navigation, setMyDesires}) {
     fetchDesires(index);
   };
 
+  const handleOnRefresh = async () => {
+    setIsRefreshing(true);
+    await fetchDesires();
+    setIsRefreshing(false);
+  };
+
   const desiresAlignScrollView = () => {
     if (store.myDesires.length === 0 && !isRefreshing) {
       return {
@@ -57,7 +77,9 @@ function MeusDesejos({store, navigation, setMyDesires}) {
         justifyContent: 'center',
       };
     }
-    return {};
+    return {
+      flexGrow: 0.8,
+    };
   };
 
   return (
@@ -78,11 +100,7 @@ function MeusDesejos({store, navigation, setMyDesires}) {
               <RefreshControl
                 colors={['#193E5B']}
                 refreshing={isRefreshing}
-                onRefresh={async () => {
-                  setIsRefreshing(true);
-                  await fetchDesires();
-                  setIsRefreshing(false);
-                }}
+                onRefresh={() => handleOnRefresh()}
               />
             }
             ListEmptyComponent={
