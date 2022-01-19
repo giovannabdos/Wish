@@ -19,7 +19,7 @@ export default class App extends NotificationHandlerComponent {
     return (
       <Provider store={store}>
         <NavigationContainer>
-          <StatusBar backgroundColor={'#193E5B'} />
+          <StatusBar backgroundColor={'#193E5B'} barStyle={'light-content'} />
           <Routes />
         </NavigationContainer>
       </Provider>
