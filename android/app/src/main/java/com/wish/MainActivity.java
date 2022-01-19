@@ -1,4 +1,4 @@
-package com.wish;
+package com.wishco;
 
 import android.os.Bundle;
 
