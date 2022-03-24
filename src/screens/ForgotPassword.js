@@ -47,7 +47,7 @@ function ForgotPassword() {
             {successMessage}
           </Text>
           <Button
-            text={'Alterar E-mail'}
+            text={'Tentar Novamente'}
             type="secondary"
             onPress={() => setSuccessMessage(null)}
           />
