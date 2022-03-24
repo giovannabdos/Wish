@@ -229,6 +229,9 @@ function AddDesejo({store, navigation, setMyDesires}) {
                     label={'E-mail (opcional)'}
                     value={values.email}
                     onChangeText={handleChange('email')}
+                    textContentType="emailAddress"
+                    keyboardType="email-address"
+                    autoCapitalize="none"
                     errorMessage={
                       touched?.email && errors?.email && errors.email
                     }

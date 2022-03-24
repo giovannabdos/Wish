@@ -1,6 +1,6 @@
 import React, {useState} from 'react';
 import {connect} from 'react-redux';
-import {StyleSheet, Image, View, Text} from 'react-native';
+import {StyleSheet, Image, View, Text, TouchableOpacity} from 'react-native';
 import {setUser, setToken} from '../redux/actions';
 import Logo from '../assets/images/Logo.png';
 import Input from '../components/Input';
@@ -11,7 +11,7 @@ import api from '../services/api';
 import ErrorMessage from '../components/ErrorMessage';
 import {maskCPF} from '../utils/masks';
 
-function Login({setUser, setToken}) {
+function Login({setUser, setToken, navigation}) {
   const [login, setLogin] = useState('');
   const [loginErrorMessage, setLoginErrorMessage] = useState(null);
   const [password, setPassword] = useState('');
@@ -109,7 +109,12 @@ function Login({setUser, setToken}) {
             errorMessage={passwordErrorMessage}
           />
         </View>
-        <Text style={styles.text}>Esqueceu a Senha?</Text>
+
+        <TouchableOpacity
+          style={styles.containerForgotPassword}
+          onPress={() => navigation.navigate('ForgotPassword')}>
+          <Text style={styles.text}>Esqueceu a Senha?</Text>
+        </TouchableOpacity>
 
         <Button
           type="tertiary"
@@ -168,11 +173,13 @@ const styles = StyleSheet.create({
     fontFamily: 'Montserrat',
     color: '#FFFFFF',
   },
-  text: {
+  containerForgotPassword: {
     marginTop: 15,
-    color: '#FFFFFF',
-    alignSelf: 'flex-end',
     marginBottom: 50,
+    alignSelf: 'flex-end',
+  },
+  text: {
+    color: '#FFFFFF',
     fontFamily: 'Montserrat',
   },
 });

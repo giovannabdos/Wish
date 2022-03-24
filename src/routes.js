@@ -1,6 +1,7 @@
 import React, {useState, useEffect} from 'react';
 import {connect} from 'react-redux';
 import Login from './screens/Login';
+import ForgotPassword from './screens/ForgotPassword';
 import MeusDesejos from './screens/MeusDesejos';
 import DesejoDetalhes from './screens/DesejoDetalhes';
 import OutrosDesejos from './screens/OutrosDesejos';
@@ -198,6 +199,14 @@ function LoginStack() {
         component={Login}
         options={{
           headerShown: false,
+        }}
+      />
+      <Stack.Screen
+        name="ForgotPassword"
+        component={ForgotPassword}
+        options={{
+          ...defaultHeader,
+          headerTitle: 'Esqueceu a Senha?',
         }}
       />
     </Stack.Navigator>

@@ -1,10 +1,18 @@
 import React from 'react';
 import {StyleSheet, ScrollView} from 'react-native';
 
-export default function Container({component = ScrollView, children}) {
+export default function Container({
+  component = ScrollView,
+  children,
+  ...props
+}) {
   const Component = component;
 
-  return <Component style={styles.container}>{children}</Component>;
+  return (
+    <Component style={styles.container} {...props}>
+      {children}
+    </Component>
+  );
 }
 
 const styles = StyleSheet.create({
