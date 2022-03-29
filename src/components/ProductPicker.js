@@ -5,13 +5,11 @@ import {
   Text,
   TouchableOpacity,
   Image,
-  PermissionsAndroid,
   Dimensions,
 } from 'react-native';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
-import {launchCamera, launchImageLibrary} from 'react-native-image-picker';
-import ErrorMessage from '../components/ErrorMessage';
-import ModalSelectable from '../components/ModalSelectable';
+import SelectPhoto from './SelectPhoto';
+import ErrorMessage from './ErrorMessage';
 
 const {width, height} = Dimensions.get('window');
 
@@ -21,27 +19,7 @@ export default function ProductPicker({value, onChange, errorMessage, text}) {
   const [image, setImage] = useState(value || null);
   const [imageHeight, setImageHeight] = useState(0);
 
-  const modalSelectableRef = useRef(null);
-
-  const requestCameraPermission = async () => {
-    try {
-      const granted = await PermissionsAndroid.request(
-        PermissionsAndroid.PERMISSIONS.CAMERA,
-      );
-      if (granted === PermissionsAndroid.RESULTS.GRANTED) {
-        return true;
-      }
-      return false;
-    } catch (err) {
-      return false;
-    }
-  };
-
-  const getImageName = uri => {
-    const nameArray = uri.split('/');
-    const nameImage = nameArray[nameArray.length - 1];
-    return nameImage;
-  };
+  const SelectPhotoRef = useRef(null);
 
   // const ajusteContainerImagem = image => {
   //   if (image && image.uri) {
@@ -112,59 +90,8 @@ export default function ProductPicker({value, onChange, errorMessage, text}) {
   //   });
   // };
 
-  const handleLaunchCamera = () => {
-    if (!requestCameraPermission()) return false;
-
-    const options = {
-      mediaType: 'photo',
-    };
-
-    launchCamera(options, async responseImage => {
-      const file = responseImage.assets?.[0];
-      if (file) {
-        // ajusteContainerImagem(responseImage);
-        const imageName = file.fileName;
-        if (!imageName) {
-          imageName = getImageName(file.uri);
-        }
-        const image = {
-          uri: file.uri,
-          name: imageName,
-          type: file.type,
-        };
-        setImage(image);
-        onChange(image);
-      }
-    });
-  };
-
-  const handleLaunchImageLibrary = () => {
-    const options = {
-      mediaType: 'photo',
-    };
-
-    launchImageLibrary(options, async responseImage => {
-      const file = responseImage.assets?.[0];
-      if (file) {
-        // ajusteContainerImagem(responseImage);
-        const imageName = file.fileName;
-        if (!imageName) {
-          imageName = getImageName(file.uri);
-        }
-        const image = {
-          uri: file.uri,
-          name: imageName,
-          type: file.type,
-        };
-        setImage(image);
-        onChange(image);
-      }
-    });
-  };
-
   return (
-    <TouchableOpacity
-      onPress={() => modalSelectableRef?.current?.setVisible(true)}>
+    <TouchableOpacity onPress={() => SelectPhotoRef?.current?.setVisible(true)}>
       {!!image ? (
         <View style={styles.containerImage}>
           <Image
@@ -190,7 +117,6 @@ export default function ProductPicker({value, onChange, errorMessage, text}) {
           <MaterialCommunityIcons
             name="camera-plus"
             size={70}
-            style={{marginLeft: 14}}
             color={'#BABABA'}
             style={styles.camera}
           />
@@ -199,17 +125,12 @@ export default function ProductPicker({value, onChange, errorMessage, text}) {
           </Text>
         </View>
       )}
-      <ModalSelectable
-        ref={modalSelectableRef}
-        list={[{name: 'Câmera'}, {name: 'Galeria'}]}
-        onChange={index => {
-          if (index === 0) {
-            handleLaunchCamera();
-          } else {
-            handleLaunchImageLibrary();
-          }
+      <SelectPhoto
+        ref={SelectPhotoRef}
+        onChange={image => {
+          setImage(image);
+          onChange(image);
         }}
-        selectable={false}
       />
       {!!errorMessage && (
         <View style={styles.errorMessageContainer}>

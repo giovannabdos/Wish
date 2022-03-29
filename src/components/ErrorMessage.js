@@ -1,7 +1,7 @@
 import React, {useState, useEffect} from 'react';
 import {StyleSheet, Text} from 'react-native';
 
-export default function ErrorMessage({message, type}) {
+export default function ErrorMessage({message, type, textStyle = {}}) {
   const [errorColor, setErrorColor] = useState('#dd2c00');
 
   useEffect(() => {
@@ -12,7 +12,9 @@ export default function ErrorMessage({message, type}) {
 
   return (
     !!message && (
-      <Text style={[styles.text, {color: errorColor}]}>{message}</Text>
+      <Text style={[styles.text, {color: errorColor}, textStyle]}>
+        {message}
+      </Text>
     )
   );
 }

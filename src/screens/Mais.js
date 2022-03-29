@@ -22,7 +22,9 @@ export default function Mais() {
   return (
     <Container style={styles.container}>
       <View style={styles.row}>
-        <TouchableOpacity style={styles.button}>
+        <TouchableOpacity
+          style={styles.button}
+          onPress={() => navigation.navigate('MyProfile')}>
           <FontAwesome name="user" size={35} color="#4D4D4D" />
           <Text style={styles.text}>Meu Perfil</Text>
         </TouchableOpacity>

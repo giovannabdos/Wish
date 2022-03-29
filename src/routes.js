@@ -9,6 +9,8 @@ import Consultas from './screens/Consultas';
 import AddDesejo from './screens/AddDesejo';
 import Settings from './screens/Settings';
 import Mais from './screens/Mais';
+import MyProfile from './screens/MyProfile';
+import EditMyProfile from './screens/EditMyProfile';
 // import {createMaterialBottomTabNavigator} from '@react-navigation/material-bottom-tabs';
 import {createBottomTabNavigator} from '@react-navigation/bottom-tabs';
 import {createStackNavigator} from '@react-navigation/stack';
@@ -116,6 +118,16 @@ function MaisStack() {
         name="Settings"
         component={Settings}
         options={{...defaultHeader, headerTitle: 'Configurações'}}
+      />
+      <Stack.Screen
+        name="MyProfile"
+        component={MyProfile}
+        options={{...defaultHeader, headerTitle: 'Meu Perfil'}}
+      />
+      <Stack.Screen
+        name="EditMyProfile"
+        component={EditMyProfile}
+        options={{...defaultHeader, headerTitle: 'Editar Meu Perfil'}}
       />
     </Stack.Navigator>
   );
