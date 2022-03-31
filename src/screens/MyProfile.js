@@ -67,6 +67,7 @@ function MyProfile({navigation, store, setUser}) {
 
       await Local.setUser(user);
       setUser(user);
+      setPhoto(user.photo)
       setSubmitting(false);
     } catch (response) {
       if (response?.data?.message) {
@@ -127,6 +128,10 @@ function MyProfile({navigation, store, setUser}) {
                   setFieldTouched('photo', true);
                   setPhoto(image.uri);
                   handleSubmit();
+                }}
+                resizeOptions={{
+                  width: 300,
+                  height: 300,
                 }}
               />
             </TouchableOpacity>

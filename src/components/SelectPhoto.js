@@ -1,9 +1,17 @@
-import React, {useRef, useImperativeHandle, forwardRef} from 'react';
+import React, {useState, useRef, useImperativeHandle, forwardRef} from 'react';
 import {PermissionsAndroid} from 'react-native';
 import {launchCamera, launchImageLibrary} from 'react-native-image-picker';
+import ImageResizer from 'react-native-image-resizer';
 import ModalSelectable from './ModalSelectable';
 
-const SelectPhoto = forwardRef(({onChange}, ref) => {
+const SelectPhoto = forwardRef(({resizeOptions = {}, onChange}, ref) => {
+  const [imageResizeOptions] = useState({
+    width: 600,
+    height: 600,
+    quality: 100,
+    ...resizeOptions,
+  });
+
   const modalSelectableRef = useRef(null);
 
   useImperativeHandle(
@@ -34,6 +42,20 @@ const SelectPhoto = forwardRef(({onChange}, ref) => {
     return nameImage;
   };
 
+  const resizeFile = async file => {
+    let newFile = file;
+    await ImageResizer.createResizedImage(
+      file.uri,
+      imageResizeOptions.width,
+      imageResizeOptions.height,
+      'JPEG',
+      imageResizeOptions.quality,
+    ).then(resizedFile => {
+      newFile = resizedFile;
+    });
+    return newFile;
+  };
+
   const handleLaunchCamera = () => {
     if (!requestCameraPermission()) return false;
 
@@ -44,13 +66,13 @@ const SelectPhoto = forwardRef(({onChange}, ref) => {
     launchCamera(options, async responseImage => {
       const file = responseImage.assets?.[0];
       if (file) {
-        // ajusteContainerImagem(responseImage);
-        const imageName = file.fileName;
+        const resizedfile = await resizeFile(file);
+        const imageName = file?.fileName;
         if (!imageName) {
           imageName = getImageName(file.uri);
         }
         const image = {
-          uri: file.uri,
+          uri: resizedfile.uri,
           name: imageName,
           type: file.type,
         };
@@ -67,13 +89,13 @@ const SelectPhoto = forwardRef(({onChange}, ref) => {
     launchImageLibrary(options, async responseImage => {
       const file = responseImage.assets?.[0];
       if (file) {
-        // ajusteContainerImagem(responseImage);
-        const imageName = file.fileName;
+        const resizedfile = await resizeFile(file);
+        const imageName = file?.fileName;
         if (!imageName) {
           imageName = getImageName(file.uri);
         }
         const image = {
-          uri: file.uri,
+          uri: resizedfile.uri,
           name: imageName,
           type: file.type,
         };
